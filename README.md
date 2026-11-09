@@ -38,7 +38,7 @@
 
 ```mermaid
 graph TD
-    A["수신 이메일 데이터<br/>(sample_emails.json / IMAP)"] --> C["전처리 & 텍스트 정제<br/>(BeautifulSoup, Regex)"]
+    A["수신 이메일 데이터<br/>(Gmail API OAuth 2.0 / IMAP / EML)"] --> C["전처리 & 텍스트 정제<br/>(BeautifulSoup, Regex)"]
     B["실시간 뉴스 RSS 피드<br/>(IT · 경제 · 시사)"] --> C
     
     C --> D{"지능형 듀얼 AI 엔진"}
@@ -98,7 +98,8 @@ graph TD
 
 ```
 Mail Classification Project/
-├── index.html             # GitHub Pages 배포용 반응형 웹 대시보드 (SPA)
+├── index.html             # GitHub Pages 배포용 반응형 웹 대시보드 (SPA - Gmail 연동 및 EML 파서 포함)
+├── gmail_fetcher.py       # Google OAuth 2.0 기반 실제 Gmail 수신함 연동 및 자동 분류기
 ├── config.py              # 카테고리, RSS 피드 URL, 시스템 환경 설정
 ├── mail_classifier.py     # 파이썬 기반 이메일 맥락 분석 및 중요도 판별 모듈
 ├── news_summarizer.py     # 파이썬 기반 RSS 수집 및 3줄 요약 모듈

@@ -34,7 +34,7 @@
 ```mermaid
 flowchart TD
     subgraph Data_Sources ["1. 데이터 수집 계층"]
-        M1["수신 메일함 (IMAP / Sample Dataset)"]
+        M1["수신 메일함 (Gmail API OAuth 2.0 / IMAP / EML)"]
         N1["실시간 뉴스 피드 (IT · 경제 · 시사 RSS)"]
     end
 
@@ -54,7 +54,7 @@ flowchart TD
         O2["분야별 3줄 요약<br/>+ 실무 인사이트 Takeaway"]
     end
 
-    subgraph Service_UI ["4. 사용자 인터페이스 (Streamlit)"]
+    subgraph Service_UI ["4. 사용자 인터페이스 (GitHub Pages 24/7)"]
         UI1["🌅 모닝 브리핑 (Daily Quick Glance)"]
         UI2["📧 스마트 수신함 & To-Do 관리"]
         UI3["📰 분야별 실시간 뉴스 피드"]

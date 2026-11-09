@@ -12,6 +12,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Identity Services (GIS) for Gmail OAuth -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script>
         tailwind.config = {
             theme: {
@@ -74,12 +76,15 @@
             </div>
 
             <!-- Header Quick Actions -->
-            <div class="flex items-center space-x-3">
+            <div class="flex items-center space-x-2 sm:space-x-3">
+                <button onclick="openGmailModal()" class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white flex items-center gap-1.5 transition shadow-sm">
+                    <i data-lucide="mail-plus" class="w-4 h-4"></i> 내 메일 연동
+                </button>
                 <button onclick="window.print()" class="text-xs font-medium px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 text-slate-700 flex items-center gap-1.5 transition">
                     <i data-lucide="printer" class="w-4 h-4"></i> PDF 인쇄
                 </button>
                 <a href="https://github.com/JeongSeongHun054/Mail_Classification_Project" target="_blank" id="github-link" class="text-xs font-medium px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white flex items-center gap-1.5 transition">
-                    <i data-lucide="github" class="w-4 h-4"></i> GitHub Repo
+                    <i data-lucide="github" class="w-4 h-4"></i> GitHub
                 </a>
             </div>
         </div>
@@ -163,6 +168,27 @@
 
         <!-- ================= TAB 2: 스마트 수신함 ================= -->
         <section id="tab-inbox" class="hidden space-y-6">
+            <!-- Mail Connect Hero Banner -->
+            <div class="bg-gradient-to-r from-red-50 via-orange-50 to-amber-50 p-5 rounded-2xl border border-red-200/80 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div class="flex items-center gap-3.5">
+                    <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-red-500 to-rose-600 text-white flex items-center justify-center font-bold shadow-md shadow-red-500/20">
+                        <i data-lucide="mail-check" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 class="text-base font-extrabold text-slate-900">내 실제 메일 수신함 불러와서 AI 분류하기</h3>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700">Gmail OAuth 지원</span>
+                        </div>
+                        <p class="text-xs text-slate-600 mt-0.5">Google 계정으로 로그인하여 실제 Gmail 수신함을 가져오거나, 다운로드한 메일 파일(.eml)을 올려 실시간 AI 분류를 체험해보세요.</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 w-full sm:w-auto">
+                    <button onclick="openGmailModal()" class="w-full sm:w-auto px-4 py-2 text-xs font-bold rounded-xl bg-red-600 hover:bg-red-700 text-white flex items-center justify-center gap-2 shadow-sm shadow-red-500/25 transition">
+                        <i data-lucide="sparkles" class="w-4 h-4"></i> 내 메일 가져오기
+                    </button>
+                </div>
+            </div>
+
             <!-- Filter Bar -->
             <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
                 <div class="flex flex-wrap gap-2 w-full md:w-auto">
@@ -390,6 +416,105 @@
 
             <div class="flex justify-end pt-2">
                 <button onclick="closeModal()" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-lg">닫기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Gmail & Custom Email Connection -->
+    <div id="gmail-modal" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[92vh] overflow-y-auto p-6 space-y-5 shadow-2xl">
+            <div class="flex justify-between items-start border-b border-slate-100 pb-3">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-red-100 text-red-600 flex items-center justify-center font-bold">
+                        <i data-lucide="mail-plus" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-extrabold text-slate-900">내 실제 메일 수신함 불러오기 & AI 분류</h3>
+                        <p class="text-xs text-slate-500">Google Gmail 연동 또는 메일 파일(.eml) 업로드로 실시간 AI 분류를 테스트하세요.</p>
+                    </div>
+                </div>
+                <button onclick="closeGmailModal()" class="text-slate-400 hover:text-slate-600 p-1">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Tab Switcher inside Modal -->
+            <div class="flex border-b border-slate-200">
+                <button onclick="switchGmailSubTab('oauth')" id="subtab-btn-oauth" class="subtab-btn px-4 py-2 text-xs font-bold border-b-2 border-red-600 text-red-600 flex items-center gap-1.5">
+                    <i data-lucide="mail" class="w-4 h-4"></i> Gmail 1클릭 연동
+                </button>
+                <button onclick="switchGmailSubTab('eml')" id="subtab-btn-eml" class="subtab-btn px-4 py-2 text-xs font-semibold text-slate-500 hover:text-slate-800 border-b-2 border-transparent flex items-center gap-1.5">
+                    <i data-lucide="file-up" class="w-4 h-4"></i> 메일 파일(.eml) 업로드
+                </button>
+                <button onclick="switchGmailSubTab('direct')" id="subtab-btn-direct" class="subtab-btn px-4 py-2 text-xs font-semibold text-slate-500 hover:text-slate-800 border-b-2 border-transparent flex items-center gap-1.5">
+                    <i data-lucide="edit-3" class="w-4 h-4"></i> 직접 복사·붙여넣기
+                </button>
+            </div>
+
+            <!-- SUBTAB 1: Google OAuth -->
+            <div id="subtab-oauth" class="space-y-4">
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs text-slate-600 space-y-2">
+                    <div class="font-bold text-slate-900 flex items-center gap-1.5">
+                        <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i> 안전한 Google 공식 OAuth 2.0 연동
+                    </div>
+                    <p>Google Identity Services를 통해 브라우저에서 안전하게 승인하며, 비밀번호는 절대 저장되거나 전송되지 않습니다. 수신함에서 최근 메일 8건을 읽어와 즉시 AI 중요도 분류를 실행합니다.</p>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-xs font-bold text-slate-700">Google Cloud Client ID (선택 사항)</label>
+                    <input type="text" id="google-client-id" placeholder="apps.googleusercontent.com 형식의 클라이언트 ID (미입력 시 데모 연동)" class="w-full text-xs p-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-red-500 focus:outline-none">
+                    <p class="text-[11px] text-slate-400">※ Google Cloud Console에서 생성한 웹 애플리케이션 클라이언트 ID가 있다면 입력하세요.</p>
+                </div>
+
+                <div class="pt-2">
+                    <button onclick="triggerGoogleSignIn()" id="btn-google-login" class="w-full py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-md shadow-red-500/20 transition">
+                        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.24 10.285V14.4h6.806c-.275 1.765-2.056 5.174-6.806 5.174-4.095 0-7.439-3.389-7.439-7.574s3.345-7.574 7.439-7.574c2.33 0 3.891.989 4.785 1.849l3.254-3.138C18.189 1.186 15.479 0 12.24 0c-6.635 0-12 5.365-12 12s5.365 12 12 12c6.926 0 11.52-4.869 11.52-11.726 0-.788-.085-1.39-.189-1.989H12.24z"/></svg>
+                        Google 계정으로 로그인 & 내 Gmail 8건 분석하기
+                    </button>
+                    <div id="oauth-status" class="text-xs text-center text-slate-500 mt-2 hidden"></div>
+                </div>
+            </div>
+
+            <!-- SUBTAB 2: EML File Upload -->
+            <div id="subtab-eml" class="hidden space-y-4">
+                <div class="border-2 border-dashed border-slate-300 hover:border-blue-500 rounded-2xl p-6 text-center cursor-pointer transition bg-slate-50/50" onclick="document.getElementById('eml-file-input').click()">
+                    <input type="file" id="eml-file-input" accept=".eml,.txt" multiple class="hidden" onchange="handleEmlFileSelect(event)">
+                    <div class="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mx-auto mb-3">
+                        <i data-lucide="upload-cloud" class="w-6 h-6"></i>
+                    </div>
+                    <div class="text-xs font-bold text-slate-800">Gmail, 네이버 등에서 다운로드한 .eml 메일 파일 클릭 또는 드래그</div>
+                    <p class="text-[11px] text-slate-400 mt-1">네이버 메일 [더보기 ➔ PC 저장(.eml)] 또는 Gmail [점 3개 ➔ 메시지 다운로드] 파일을 지원합니다.</p>
+                </div>
+                <div id="eml-upload-feedback" class="text-xs text-slate-600 space-y-1"></div>
+            </div>
+
+            <!-- SUBTAB 3: Direct Text Input -->
+            <div id="subtab-direct" class="hidden space-y-3">
+                <div class="flex gap-2 mb-2">
+                    <span class="text-xs text-slate-500 font-semibold self-center">빠른 예시 채우기:</span>
+                    <button onclick="fillDirectSample('urgent')" class="px-2 py-1 text-[11px] font-bold rounded bg-red-50 text-red-700 hover:bg-red-100">긴급 요청</button>
+                    <button onclick="fillDirectSample('promo')" class="px-2 py-1 text-[11px] font-bold rounded bg-slate-100 text-slate-700 hover:bg-slate-200">할인 광고</button>
+                    <button onclick="fillDirectSample('notice')" class="px-2 py-1 text-[11px] font-bold rounded bg-amber-50 text-amber-800 hover:bg-amber-100">단순 공지</button>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">메일 제목</label>
+                    <input type="text" id="direct-subject" placeholder="[긴급] 내일 미팅 자료 최종 확인 요청 건" class="w-full text-xs p-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">발신자</label>
+                    <input type="text" id="direct-sender" placeholder="홍길동 팀장 <kdhong@company.com>" class="w-full text-xs p-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">메일 본문 내용</label>
+                    <textarea id="direct-body" rows="4" placeholder="메일 본문을 복사해서 여기에 붙여넣으세요..." class="w-full text-xs p-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:outline-none leading-relaxed"></textarea>
+                </div>
+                <button onclick="runDirectClassification()" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition">
+                    <i data-lucide="sparkles" class="w-4 h-4"></i> AI 맥락 분석 실행 & 수신함 추가
+                </button>
+            </div>
+
+            <div class="flex justify-end pt-2 border-t border-slate-100">
+                <button onclick="closeGmailModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg">닫기</button>
             </div>
         </div>
     </div>
@@ -788,12 +913,18 @@
 
             // 2. Category Pie Chart
             const ctx2 = document.getElementById('categoryPieChart').getContext('2d');
+            const counts = {
+                '긴급 업무': emailsData.filter(e => e.category === '긴급 업무').length,
+                '일반 업무': emailsData.filter(e => e.category === '일반 업무').length,
+                '단순 공지': emailsData.filter(e => e.category === '단순 공지').length,
+                '광고/홍보': emailsData.filter(e => e.category === '광고/홍보').length
+            };
             new Chart(ctx2, {
                 type: 'doughnut',
                 data: {
                     labels: ['긴급 업무', '일반 업무', '단순 공지', '광고/홍보'],
                     datasets: [{
-                        data: [2, 2, 2, 2],
+                        data: [counts['긴급 업무'], counts['일반 업무'], counts['단순 공지'], counts['광고/홍보']],
                         backgroundColor: ['#ef4444', '#3b82f6', '#f59e0b', '#cbd5e1']
                     }]
                 },
@@ -807,8 +938,385 @@
             });
         }
 
+        // ================= Gmail & Custom Mail Logic =================
+        function openGmailModal() {
+            document.getElementById("gmail-modal").classList.remove("hidden");
+            const savedClientId = localStorage.getItem("g_client_id");
+            if (savedClientId) {
+                document.getElementById("google-client-id").value = savedClientId;
+            }
+            lucide.createIcons();
+        }
+
+        function closeGmailModal() {
+            document.getElementById("gmail-modal").classList.add("hidden");
+        }
+
+        function switchGmailSubTab(tab) {
+            ['oauth', 'eml', 'direct'].forEach(t => {
+                const el = document.getElementById(`subtab-${t}`);
+                const btn = document.getElementById(`subtab-btn-${t}`);
+                if (t === tab) {
+                    el.classList.remove('hidden');
+                    btn.className = "subtab-btn px-4 py-2 text-xs font-bold border-b-2 border-red-600 text-red-600 flex items-center gap-1.5";
+                } else {
+                    el.classList.add('hidden');
+                    btn.className = "subtab-btn px-4 py-2 text-xs font-semibold text-slate-500 hover:text-slate-800 border-b-2 border-transparent flex items-center gap-1.5";
+                }
+            });
+            lucide.createIcons();
+        }
+
+        // Dynamic Badge Counter Updater
+        function updateBadgesAndCounters() {
+            const urgentCount = emailsData.filter(e => e.category === "긴급 업무").length;
+            const normalCount = emailsData.filter(e => e.category === "일반 업무").length;
+            const noticeCount = emailsData.filter(e => e.category === "단순 공지").length;
+            const promoCount = emailsData.filter(e => e.category === "광고/홍보").length;
+
+            document.getElementById("count-all").textContent = emailsData.length;
+            document.getElementById("count-urgent").textContent = urgentCount;
+            document.getElementById("count-normal").textContent = normalCount;
+            document.getElementById("count-notice").textContent = noticeCount;
+            document.getElementById("count-promo").textContent = promoCount;
+            document.getElementById("inbox-badge").textContent = urgentCount;
+        }
+
+        // Client-side AI Context Analysis Engine
+        function analyzeEmailClient(subject, body, sender = "알 수 없음") {
+            const fullText = (subject + "\n" + body).toLowerCase();
+            const rawText = subject + "\n" + body;
+
+            // 1. Promo check
+            const promoKeywords = ["광고", "할인", "특가", "세일", "쿠폰", "프로모션", "이벤트", "무료체험", "얼리버드", "마케팅"];
+            const isPromo = subject.includes("[광고]") || subject.includes("(광고)") || 
+                            promoKeywords.filter(k => fullText.includes(k)).length >= 2;
+
+            if (isPromo) {
+                return {
+                    importance: "LOW",
+                    category: "광고/홍보",
+                    summary: subject.replace(/\[.*?\]|\(.*?\)/g, "").trim() + " 관련 프로모션 및 혜택 안내",
+                    action_items: [],
+                    reason: "광고성 표기 및 판촉/할인 키워드 감지로 저우선순위 분류"
+                };
+            }
+
+            // 2. Urgent check
+            const urgentKeywords = ["긴급", "마감", "승인", "검토", "회신", "기한", "세금계산서", "결재", "확인 요청", "피드백"];
+            const hasUrgentTag = subject.includes("[긴급]") || subject.includes("[중요]") || subject.includes("마감");
+            const urgentHits = urgentKeywords.filter(k => rawText.includes(k));
+
+            if (hasUrgentTag || urgentHits.length >= 2) {
+                const actionItems = [];
+                if (rawText.includes("검토")) actionItems.push("첨부 문서 및 관련 내용 검토 후 회신");
+                if (rawText.includes("승인") || rawText.includes("결재")) actionItems.push("결재 시스템 접속 후 승인 진행");
+                if (rawText.includes("회신")) actionItems.push("요청 사항 확인 후 기한 내 회신");
+                if (actionItems.length === 0) actionItems.push("상세 내용 확인 및 마감 일정 준수");
+
+                return {
+                    importance: "HIGH",
+                    category: "긴급 업무",
+                    summary: subject.replace(/\[.*?\]/g, "").trim(),
+                    action_items: actionItems,
+                    reason: `마감 시한 및 핵심 업무 조치 요청 감지 (${urgentHits.slice(0, 3).join(", ")})`
+                };
+            }
+
+            // 3. Notice check
+            const noticeKeywords = ["공지", "점검", "안내", "일정 안내", "변경"];
+            if (subject.includes("[공지]") || subject.includes("[안내]") || rawText.includes("정기 점검") || rawText.includes("시스템 점검")) {
+                return {
+                    importance: "LOW",
+                    category: "단순 공지",
+                    summary: subject.replace(/\[.*?\]/g, "").trim(),
+                    action_items: ["관련 일정 캘린더 등록 확인"],
+                    reason: "단순 시스템 점검 및 사내/서비스 공지사항으로 즉각 조치 불필요"
+                };
+            }
+
+            // 4. Default Normal
+            return {
+                importance: "MEDIUM",
+                category: "일반 업무",
+                summary: subject.trim(),
+                action_items: ["내용 확인 및 필요 시 메모"],
+                reason: "일상 업무 및 참조용 공유 메일로 중간 우선순위 분류"
+            };
+        }
+
+        // Google Identity Services OAuth Sign-In
+        let tokenClient;
+        function triggerGoogleSignIn() {
+            const statusEl = document.getElementById("oauth-status");
+            const customClientId = document.getElementById("google-client-id").value.trim();
+
+            if (!customClientId) {
+                // If no Client ID entered, guide user or offer 1-click mock simulation
+                const confirmSim = confirm(
+                    "💡 Google Cloud OAuth Client ID가 아직 입력되지 않았습니다.\n\n" +
+                    "[확인]: 실제 Gmail 연동 가이드 및 데모 시뮬레이션으로 수신함 갱신\n" +
+                    "[취소]: Google Cloud Console에서 Client ID 발급 후 입력"
+                );
+                if (confirmSim) {
+                    simulateGoogleGmailFetch();
+                } else {
+                    window.open("https://console.cloud.google.com/apis/credentials", "_blank");
+                }
+                return;
+            }
+
+            localStorage.setItem("g_client_id", customClientId);
+            statusEl.classList.remove("hidden");
+            statusEl.innerHTML = `<span class="text-blue-600 font-bold">Google 로그인 팝업 호출 중...</span>`;
+
+            try {
+                tokenClient = google.accounts.oauth2.initTokenClient({
+                    client_id: customClientId,
+                    scope: 'https://www.googleapis.com/auth/gmail.readonly',
+                    callback: async (resp) => {
+                        if (resp.error) {
+                            statusEl.innerHTML = `<span class="text-red-600 font-bold">OAuth 오류: ${resp.error}</span>`;
+                            return;
+                        }
+                        statusEl.innerHTML = `<span class="text-blue-600 font-bold">Gmail 수신함에서 최신 메일 수집 중...</span>`;
+                        await fetchRealGmailMessages(resp.access_token);
+                    }
+                });
+                tokenClient.requestAccessToken({ prompt: 'consent' });
+            } catch (err) {
+                statusEl.innerHTML = `<span class="text-red-600 font-bold">Google 연동 초기화 실패: ${err.message}</span>`;
+            }
+        }
+
+        async function fetchRealGmailMessages(token) {
+            try {
+                const listResp = await fetch("https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=8&q=in:inbox", {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                const listData = await listResp.json();
+                const messages = listData.messages || [];
+
+                if (messages.length === 0) {
+                    alert("Gmail 수신함에 메일이 없습니다.");
+                    closeGmailModal();
+                    return;
+                }
+
+                const newEmails = [];
+                for (let i = 0; i < messages.length; i++) {
+                    const msgResp = await fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages/${messages[i].id}?format=full`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    const msgData = await msgResp.json();
+                    const headers = msgData.payload.headers || [];
+
+                    const subject = (headers.find(h => h.name.toLowerCase() === "subject") || {}).value || "(제목 없음)";
+                    const from = (headers.find(h => h.name.toLowerCase() === "from") || {}).value || "알 수 없음";
+                    const date = (headers.find(h => h.name.toLowerCase() === "date") || {}).value || "오늘";
+                    const snippet = msgData.snippet || "";
+
+                    const analysis = analyzeEmailClient(subject, snippet, from);
+                    newEmails.push({
+                        id: `real-gmail-${i + 1}`,
+                        sender: from.replace(/([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)/, '***@$2'),
+                        subject: subject,
+                        date: date.substring(0, 25),
+                        importance: analysis.importance,
+                        category: analysis.category,
+                        summary: analysis.summary,
+                        reason: analysis.reason,
+                        action_items: analysis.action_items,
+                        body: snippet
+                    });
+                }
+
+                emailsData.length = 0;
+                emailsData.push(...newEmails);
+
+                updateBadgesAndCounters();
+                renderBriefing();
+                renderInbox();
+                closeGmailModal();
+                alert(`🎉 실제 본인의 Gmail ${newEmails.length}개를 불러와 AI 분류를 완료했습니다!`);
+            } catch (err) {
+                alert(`Gmail 데이터 가져오기 실패: ${err.message}`);
+            }
+        }
+
+        function simulateGoogleGmailFetch() {
+            const simulated = [
+                {
+                    id: "gmail-user-01",
+                    sender: "Google Cloud Billing <billing@google.com>",
+                    subject: "[중요] 11월 Vertex AI & Cloud GPU 사용료 결제 승인 확인 필요",
+                    date: "오늘 09:15",
+                    importance: "HIGH",
+                    category: "긴급 업무",
+                    summary: "Vertex AI 및 GPU 인프라 요금 청구 내역 확인 및 결제 수단 점검",
+                    reason: "결제 승인 및 마감 일정 관련 중요 키워드 감지로 HIGH 분류",
+                    action_items: ["Google Cloud 콘솔에서 결제 계정 상태 확인", "11월 청구서 확인"],
+                    body: "안녕하세요. Google Cloud 고객센터입니다. 이번 청구 주기에 발생한 Vertex AI API 및 GPU 인스턴스 사용 금액이 확정되었습니다. 정상 과금을 위해 등록된 결제 수단 잔액을 확인해 주시기 바랍니다."
+                },
+                {
+                    id: "gmail-user-02",
+                    sender: "GitHub Notifications <notifications@github.com>",
+                    subject: "[긴급] SK AIGEN 프로젝트 pull request #12 코드 리뷰 및 승인 요청",
+                    date: "오늘 10:20",
+                    importance: "HIGH",
+                    category: "긴급 업무",
+                    summary: "SK AIGEN 프로젝트 PR 코드 리뷰 및 메인 브랜치 병합 승인 요청",
+                    reason: "코드 리뷰 및 마감 승인 요청 액션 감지로 HIGH 분류",
+                    action_items: ["PR #12 변경 사항 검토", "단위 테스트 통과 확인 후 병합"],
+                    body: "팀원으로부터 새로운 PR이 등록되었습니다. 메일 분류 파이프라인 최적화 커밋에 대한 리뷰를 금일 중으로 완료해 주시기 바랍니다."
+                },
+                {
+                    id: "gmail-user-03",
+                    sender: "인프런 뉴스레터 <news@inflearn.com>",
+                    subject: "[광고] 생성형 AI & LangChain 실전 강의 오늘만 40% 깜짝 세일",
+                    date: "오늘 07:30",
+                    importance: "LOW",
+                    category: "광고/홍보",
+                    summary: "AI 실무 온라인 강좌 40% 깜짝 할인 쿠폰 안내",
+                    reason: "[광고] 표기 및 할인/쿠폰 판촉 키워드 감지로 최저 우선순위 격리",
+                    action_items: [],
+                    body: "지금 가장 핫한 AI 강좌를 특별한 가격에 만나보세요. 오늘 밤 12시까지만 적용되는 시크릿 쿠폰을 바로 다운로드하세요."
+                }
+            ];
+
+            emailsData.unshift(...simulated);
+            updateBadgesAndCounters();
+            renderBriefing();
+            renderInbox();
+            closeGmailModal();
+            alert("🎉 Gmail 실제 수신함 시뮬레이션 메일 3건이 수신함에 반영되었습니다!");
+        }
+
+        // EML File Drag & Drop Handler
+        function handleEmlFileSelect(event) {
+            const files = event.target.files;
+            if (!files || files.length === 0) return;
+
+            const feedback = document.getElementById("eml-upload-feedback");
+            feedback.innerHTML = `<span class="text-blue-600 font-bold">파일 파싱 및 AI 분류 중...</span>`;
+
+            let processed = 0;
+            Array.from(files).forEach((file, idx) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const text = e.target.result;
+                    // Simple MIME parsing
+                    let subject = file.name.replace(/\.eml$/i, '');
+                    let sender = "업로드 메일";
+                    let date = "오늘";
+                    let body = "";
+
+                    const lines = text.split(/\r?\n/);
+                    let isHeader = true;
+                    const bodyLines = [];
+
+                    for (let line of lines) {
+                        if (isHeader) {
+                            if (line.trim() === "") {
+                                isHeader = false;
+                                continue;
+                            }
+                            if (line.toLowerCase().startsWith("subject:")) {
+                                subject = line.substring(8).trim();
+                            } else if (line.toLowerCase().startsWith("from:")) {
+                                sender = line.substring(5).trim();
+                            } else if (line.toLowerCase().startsWith("date:")) {
+                                date = line.substring(5).trim();
+                            }
+                        } else {
+                            bodyLines.push(line);
+                        }
+                    }
+
+                    body = bodyLines.join("\n").replace(/<[^>]*>?/gm, ' ').replace(/\s+/g, ' ').trim().substring(0, 800);
+                    if (!body) body = subject;
+
+                    const analysis = analyzeEmailClient(subject, body, sender);
+                    emailsData.unshift({
+                        id: `eml-${Date.now()}-${idx}`,
+                        sender: sender,
+                        subject: subject,
+                        date: date.substring(0, 25),
+                        importance: analysis.importance,
+                        category: analysis.category,
+                        summary: analysis.summary,
+                        reason: analysis.reason,
+                        action_items: analysis.action_items,
+                        body: body
+                    });
+
+                    processed++;
+                    if (processed === files.length) {
+                        updateBadgesAndCounters();
+                        renderBriefing();
+                        renderInbox();
+                        feedback.innerHTML = `<span class="text-emerald-600 font-bold">✓ ${processed}개 메일 파일 분류 완료!</span>`;
+                        setTimeout(() => {
+                            closeGmailModal();
+                            alert(`🎉 ${processed}개의 실제 메일(.eml)을 파싱하여 AI 분류를 완료했습니다!`);
+                        }, 500);
+                    }
+                };
+                reader.readAsText(file);
+            });
+        }
+
+        // Direct Text Input
+        function fillDirectSample(type) {
+            if (type === 'urgent') {
+                document.getElementById('direct-subject').value = "[긴급] SK AIGEN 최종 발표 자료 검토 및 오늘 18시까지 피드백 요청";
+                document.getElementById('direct-sender').value = "박서준 PM <sjpark@company.com>";
+                document.getElementById('direct-body').value = "성훈 님, 오늘 오후 6시까지 첨부된 최종 발표 슬라이드의 아키텍처 및 정량 성과 지표를 검토해 주시기 바랍니다. 이상 없으시면 승인 부탁드립니다.";
+            } else if (type === 'promo') {
+                document.getElementById('direct-subject').value = "(광고) 2026 최신 MLOps & LangChain 온라인 강좌 50% 특가 할인 쿠폰";
+                document.getElementById('direct-sender').value = "테크러닝 <promo@tech-edu.kr>";
+                document.getElementById('direct-body').value = "지금 결제 시 선착순 50% 반값 특가! 현업 엔지니어가 직접 전수하는 실전 MLOps 파이프라인 코스를 놓치지 마세요.";
+            } else {
+                document.getElementById('direct-subject').value = "[안내] 11월 AWS 클라우드 데이터센터 정기 점검 일정 안내";
+                document.getElementById('direct-sender').value = "클라우드인프라팀 <cloud@infra.com>";
+                document.getElementById('direct-body').value = "이번 주 일요일 새벽 02:00부터 04:00까지 정기 네트워크 스위치 교체 작업이 진행됩니다. 해당 시간 동안 일시적인 핑 튐 현상이 발생할 수 있습니다.";
+            }
+        }
+
+        function runDirectClassification() {
+            const subject = document.getElementById('direct-subject').value.trim();
+            const sender = document.getElementById('direct-sender').value.trim() || "직접 입력 발신자";
+            const body = document.getElementById('direct-body').value.trim();
+
+            if (!subject) {
+                alert("메일 제목을 입력해 주세요.");
+                return;
+            }
+
+            const analysis = analyzeEmailClient(subject, body, sender);
+            emailsData.unshift({
+                id: `direct-${Date.now()}`,
+                sender: sender,
+                subject: subject,
+                date: "방금 전",
+                importance: analysis.importance,
+                category: analysis.category,
+                summary: analysis.summary,
+                reason: analysis.reason,
+                action_items: analysis.action_items,
+                body: body || subject
+            });
+
+            updateBadgesAndCounters();
+            renderBriefing();
+            renderInbox();
+            closeGmailModal();
+            alert(`🎉 AI 분석 완료: [${analysis.importance}] ${analysis.category}로 분류되어 수신함에 추가되었습니다!`);
+        }
+
         // Initialize on load
         window.addEventListener("DOMContentLoaded", () => {
+            updateBadgesAndCounters();
             renderBriefing();
             renderInbox();
             renderNews();
