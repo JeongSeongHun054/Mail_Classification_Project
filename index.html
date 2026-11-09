@@ -511,15 +511,28 @@
                 <div id="modal-actions" class="space-y-1.5"></div>
             </div>
 
+            <!-- Korean Translated / Formatted Body Section -->
+            <div class="space-y-1.5">
+                <div class="flex items-center justify-between">
+                    <h4 class="text-xs font-bold text-slate-800 flex items-center gap-1.5 uppercase tracking-wider">
+                        <i data-lucide="file-text" class="w-4 h-4 text-blue-600"></i> 메일 본문 내용 (한국어)
+                    </h4>
+                    <span id="modal-translation-tag" class="text-[10px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-full flex items-center gap-1 hidden">
+                        <i data-lucide="languages" class="w-3 h-3"></i> AI 한글 번역 완료
+                    </span>
+                </div>
+                <div id="modal-korean-body" class="p-4 bg-slate-50 rounded-xl text-xs sm:text-sm text-slate-800 whitespace-pre-wrap font-sans border border-slate-200 leading-relaxed max-h-56 overflow-y-auto"></div>
+            </div>
+
             <!-- Collapsible Raw Email Text -->
-            <details class="text-xs text-slate-500 border border-slate-200 rounded-xl p-3 bg-white">
+            <details id="modal-raw-details" class="text-xs text-slate-500 border border-slate-200 rounded-xl p-3 bg-white">
                 <summary class="cursor-pointer font-bold text-slate-700 hover:text-blue-600 flex items-center justify-between select-none">
                     <span class="flex items-center gap-1.5">
-                        <i data-lucide="file-text" class="w-3.5 h-3.5 text-slate-500"></i> 수신된 원본 메일 전문(Snippet) 열람하기
+                        <i data-lucide="code" class="w-3.5 h-3.5 text-slate-500"></i> 영문 원본 메일 전문(Original Snippet) 열람하기
                     </span>
                     <span class="text-[10px] text-slate-400 font-normal">펼치기/접기</span>
                 </summary>
-                <pre id="modal-body" class="mt-2.5 p-3.5 bg-slate-50 rounded-lg text-xs text-slate-700 whitespace-pre-wrap font-sans border border-slate-200 leading-relaxed max-h-48 overflow-y-auto"></pre>
+                <pre id="modal-body" class="mt-2.5 p-3.5 bg-slate-50 rounded-lg text-xs text-slate-700 whitespace-pre-wrap font-mono border border-slate-200 leading-relaxed max-h-48 overflow-y-auto"></pre>
             </details>
 
             <div class="flex justify-end pt-2">
@@ -1038,7 +1051,21 @@
                 actionsEl.innerHTML = `<span class="text-xs text-slate-400">필요한 즉각 조치 사항이 없습니다.</span>`;
             }
 
-            document.getElementById("modal-body").textContent = item.rawBody || item.body || "(본문 전문 없음)";
+            const korBodyEl = document.getElementById("modal-korean-body");
+            const transTagEl = document.getElementById("modal-translation-tag");
+            const rawDetailsEl = document.getElementById("modal-raw-details");
+
+            if (item.isTranslated) {
+                if (transTagEl) transTagEl.classList.remove("hidden");
+                if (rawDetailsEl) rawDetailsEl.classList.remove("hidden");
+                if (korBodyEl) korBodyEl.textContent = item.translatedBody || item.body;
+                document.getElementById("modal-body").textContent = item.rawBody || item.originalBody || item.body || "(영문 원문 없음)";
+            } else {
+                if (transTagEl) transTagEl.classList.add("hidden");
+                if (rawDetailsEl) rawDetailsEl.classList.add("hidden");
+                if (korBodyEl) korBodyEl.textContent = item.body;
+                document.getElementById("modal-body").textContent = item.body;
+            }
 
             document.getElementById("email-modal").classList.remove("hidden");
             lucide.createIcons();
@@ -1195,8 +1222,82 @@
             if (!text) return false;
             const koCount = (text.match(/[\uAC00-\uD7A3]/g) || []).length;
             const enCount = (text.match(/[a-zA-Z]/g) || []).length;
-            return enCount >= 6 && (koCount === 0 || enCount > koCount * 2);
+            return enCount >= 4 && (koCount === 0 || enCount > koCount);
         }
+
+        async function translateToKorean(text) {
+            if (!text || !text.trim()) return text;
+            const koCount = (text.match(/[\uAC00-\uD7A3]/g) || []).length;
+            const enCount = (text.match(/[a-zA-Z]/g) || []).length;
+            if (koCount > 0 && koCount >= enCount) return text;
+
+            try {
+                const clean = text.replace(/[\r\n\t]+/g, ' ').replace(/\s+/g, ' ').trim().substring(0, 1500);
+                const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=ko&dt=t&q=${encodeURIComponent(clean)}`;
+                const resp = await fetch(url);
+                if (resp.ok) {
+                    const data = await resp.json();
+                    if (data && Array.isArray(data[0])) {
+                        const translated = data[0].map(part => (part && part[0]) ? part[0] : '').join('').trim();
+                        if (translated) return translated;
+                    }
+                }
+            } catch (e) {
+                console.warn("Translation API call failed, using fallback:", e);
+            }
+            return fallbackTranslateWords(text);
+        }
+
+        function fallbackTranslateWords(str) {
+            if (!str) return "";
+            let s = str;
+            const dict = [
+                [/Critical security alert/gi, "긴급 보안 경고"],
+                [/Security alert/gi, "보안 알림"],
+                [/New sign-in/gi, "새로운 기기 로그인"],
+                [/New device signed in/gi, "새 기기 로그인 감지"],
+                [/Action required/gi, "즉각 조치 필요"],
+                [/Verification code/gi, "인증 코드"],
+                [/Verify your account/gi, "계정 본인 인증"],
+                [/Verify your email/gi, "이메일 인증"],
+                [/Password reset/gi, "비밀번호 재설정"],
+                [/Reset your password/gi, "비밀번호 초기화"],
+                [/Payment failed/gi, "결제 실패"],
+                [/Payment declined/gi, "결제 승인 거절"],
+                [/Invoice/gi, "전자 인보이스"],
+                [/Statement/gi, "명세서"],
+                [/Receipt/gi, "영수증"],
+                [/Billing receipt/gi, "결제 청구 영수증"],
+                [/Subscription/gi, "정기 구독"],
+                [/Run failed/gi, "빌드/배포 실행 실패"],
+                [/Workflow failed/gi, "워크플로우 실패"],
+                [/Build failed/gi, "빌드 실패"],
+                [/Pull request/gi, "코드 리뷰 요청(PR)"],
+                [/Invited you to/gi, "참여 초대"],
+                [/Invitation to join/gi, "초대장"],
+                [/Your order has shipped/gi, "주문 상품 출고 완료"],
+                [/Out for delivery/gi, "배송 중"],
+                [/Order confirmation/gi, "주문 접수 확인"],
+                [/Thank you for your order/gi, "주문 접수 완료"],
+                [/Weekly digest/gi, "주간 다이제스트"],
+                [/Newsletter/gi, "뉴스레터"],
+                [/Important/gi, "중요"],
+                [/Urgent/gi, "긴급"],
+                [/Reminder/gi, "리마인더"],
+                [/Notice/gi, "공지"],
+                [/Notification/gi, "알림"],
+                [/Update/gi, "업데이트"],
+                [/Account/gi, "계정"],
+                [/Your/gi, "회원님의"],
+                [/Please/gi, "부탁드립니다"],
+                [/Click here/gi, "여기를 클릭하세요"]
+            ];
+            for (let [en, ko] of dict) {
+                s = s.replace(en, ko);
+            }
+            return s;
+        }
+        const translateWords = fallbackTranslateWords;
 
         function extractCleanSender(sender) {
             if (!sender) return "발신자 미상";
@@ -1212,32 +1313,6 @@
             const timePatterns = text.match(/(금일\s*\d+시|오늘\s*(?:오후|오전)?\s*\d+시|\d+월\s*\d+일|내일(?:까지)?|자정까지|24시간 이내|within \d+ hours?|due \w+|by \w+)/i);
             if (timePatterns) return timePatterns[0];
             return null;
-        }
-
-        function translateWords(str) {
-            if (!str) return "";
-            let s = str;
-            const dict = [
-                [/Security alert/gi, "보안 알림"],
-                [/Action required/gi, "조치 필요"],
-                [/Important/gi, "중요"],
-                [/Urgent/gi, "긴급"],
-                [/Reminder/gi, "리마인더"],
-                [/Notice/gi, "공지"],
-                [/Notification/gi, "알림"],
-                [/Invoice/gi, "인보이스"],
-                [/Receipt/gi, "영수증"],
-                [/Payment/gi, "결제"],
-                [/Subscription/gi, "구독"],
-                [/Update/gi, "업데이트"],
-                [/Statement/gi, "명세서"],
-                [/Account/gi, "계정"],
-                [/Your/gi, "회원님의"]
-            ];
-            for (let [en, ko] of dict) {
-                s = s.replace(en, ko);
-            }
-            return s;
         }
 
         // Translation patterns for English emails
@@ -1492,6 +1567,103 @@
             }
         ];
 
+        async function processGenericEnglishEmailAsync(rawSubject, rawBody, sender, date, id) {
+            const senderClean = extractCleanSender(sender);
+            const fullText = (rawSubject + " " + rawBody).toLowerCase();
+
+            const urgentWords = ["urgent", "critical", "action required", "important", "immediate", "alert", "security", "warning", "suspended", "failed", "verify", "deadline", "expire", "asap", "due today"];
+            const isUrgent = urgentWords.some(w => fullText.includes(w));
+
+            const promoWords = ["discount", "sale", "off", "promo", "deal", "coupon", "limited time", "special offer", "newsletter", "unsubscribe", "free shipping", "% off"];
+            const isPromo = promoWords.some(w => fullText.includes(w));
+
+            const noticeWords = ["notice", "announcement", "maintenance", "scheduled", "terms", "policy", "update", "downtime"];
+            const isNotice = noticeWords.some(w => fullText.includes(w));
+
+            let category = "일반 업무";
+            let importance = "MEDIUM";
+            let reason = `영문 메일 AI 번역 및 맥락 분석 (${senderClean})`;
+
+            if (isPromo) {
+                category = "광고/홍보";
+                importance = "LOW";
+                reason = "영문 프로모션/할인 마케팅 키워드 감지로 저우선순위 분류";
+            } else if (isUrgent) {
+                category = "긴급 업무";
+                importance = "HIGH";
+                reason = "즉각 조치가 필요한 영문 업무/보안/마감 키워드 감지";
+            } else if (isNotice) {
+                category = "단순 공지";
+                importance = "LOW";
+                reason = "영문 공지 및 정기 업데이트 안내로 단순 공지 분류";
+            }
+
+            const cleanSubj = rawSubject.replace(/\[.*?\]|\(.*?\)/g, "").trim();
+            const [transSubj, transBody] = await Promise.all([
+                translateToKorean(cleanSubj || rawSubject),
+                translateToKorean(rawBody)
+            ]);
+
+            const koreanTitle = `[${category}] ${transSubj}`;
+
+            const bodySentences = transBody
+                .split(/[.!?\n]+/)
+                .map(s => s.trim())
+                .filter(s => s.length >= 8);
+
+            let keyPoints = [];
+            if (bodySentences.length >= 2) {
+                keyPoints = [
+                    `핵심 내용: ${bodySentences[0]}.`,
+                    `세부 요약: ${bodySentences[1]}.`,
+                    bodySentences[2] ? `추가 세부 사항: ${bodySentences[2]}.` : `안내 사항: 필요 시 메일 본문의 원문 및 링크 세부 확인 권장`
+                ];
+            } else if (bodySentences.length === 1) {
+                keyPoints = [
+                    `핵심 요약: ${bodySentences[0]}.`,
+                    `발신 기관: ${senderClean} 공식 전달`,
+                    `대응 요령: 세부 내용 검토 후 필요한 경우 회신 또는 승인 진행`
+                ];
+            } else {
+                keyPoints = [
+                    `메일 제목: ${transSubj}`,
+                    `발신처: ${senderClean}`,
+                    `안내: 영문 수신 메일 자동 번역 및 가독성 정리 완료`
+                ];
+            }
+
+            let summary = transSubj;
+            if (bodySentences.length > 0) {
+                summary = `${transSubj} - ${bodySentences[0]}`;
+            }
+
+            const action_items = isUrgent 
+                ? ["영문 메일 번역본 검토 후 기한 내 즉각 회신/조치", "필요 시 담당자 공유"] 
+                : (isPromo ? [] : ["내용 확인 및 필요 시 일정 메모"]);
+
+            const deadline = isUrgent ? (extractDeadlines(rawBody + " " + rawSubject) || "🚨 긴급 대응 필요") : null;
+
+            return {
+                id: id,
+                sender: sender,
+                subject: koreanTitle,
+                isTranslated: true,
+                originalSubject: rawSubject,
+                originalBody: rawBody,
+                translatedBody: transBody,
+                date: date,
+                importance: importance,
+                category: category,
+                summary: summary,
+                reason: reason,
+                keyPoints: keyPoints,
+                deadline: deadline,
+                action_items: action_items,
+                body: transBody,
+                rawBody: rawBody
+            };
+        }
+
         function processGenericEnglishEmail(rawSubject, rawBody, sender, date, id) {
             const senderClean = extractCleanSender(sender);
             const fullText = (rawSubject + " " + rawBody).toLowerCase();
@@ -1504,7 +1676,7 @@
 
             let category = "일반 업무";
             let importance = "MEDIUM";
-            let reason = `영문 메일 맥락 분석 (${senderClean})`;
+            let reason = `영문 메일 사전 기반 분석 (${senderClean})`;
 
             if (isPromo) {
                 category = "광고/홍보";
@@ -1517,12 +1689,14 @@
             }
 
             const cleanSubj = rawSubject.replace(/\[.*?\]|\(.*?\)/g, "").trim();
-            const koreanTitle = `[${category === '긴급 업무' ? '긴급' : '영문'}] ${senderClean} 수신 알림: ${translateWords(cleanSubj)}`;
-            const summary = `${senderClean}에서 발송된 영문 메일입니다. 본문의 핵심 내용과 요청 사항을 확인하세요.`;
+            const translatedSubj = fallbackTranslateWords(cleanSubj || rawSubject);
+            const translatedBody = fallbackTranslateWords(rawBody);
+            const koreanTitle = `[${category === '긴급 업무' ? '긴급' : '영문'}] ${translatedSubj}`;
+            const summary = `${senderClean}에서 발송된 영문 메일: ${translatedSubj}`;
 
             const keyPoints = [
-                `발신처: ${senderClean}에서 발송된 공식 영문 안내 메일`,
-                `주요 요약: ${cleanSubj}`,
+                `발신처: ${senderClean} 공식 전달`,
+                `핵심 내용: ${translatedSubj}`,
                 `대응 안내: 본문 상세 링크를 확인하고 필요 시 관련 업무 조치를 진행하세요.`
             ];
 
@@ -1534,6 +1708,8 @@
                 subject: koreanTitle,
                 isTranslated: true,
                 originalSubject: rawSubject,
+                originalBody: rawBody,
+                translatedBody: translatedBody,
                 date: date,
                 importance: importance,
                 category: category,
@@ -1542,7 +1718,7 @@
                 keyPoints: keyPoints,
                 deadline: isUrgent ? "확인 요망" : null,
                 action_items: action_items,
-                body: rawBody,
+                body: translatedBody,
                 rawBody: rawBody
             };
         }
@@ -1704,7 +1880,52 @@
             };
         }
 
-        // Master Email Processing & Structuring Function
+        // Master Asynchronous Email Processing & Structuring Function
+        async function processAndStructureEmailAsync(subject, body, sender, date, id) {
+            subject = decodeHtmlEntities(subject || "(제목 없음)").trim();
+            body = decodeHtmlEntities(body || "").trim();
+            sender = decodeHtmlEntities(sender || "알 수 없음").trim();
+            date = date || "오늘";
+            id = id || ("mail-" + Date.now() + "-" + Math.random().toString(36).substring(2, 6));
+
+            const isEng = isEnglishText(subject) || isEnglishText(body);
+
+            if (isEng) {
+                for (let rule of ENGLISH_RULES) {
+                    if (rule.pattern.test(subject) || rule.pattern.test(body)) {
+                        const transBody = await translateToKorean(body);
+                        const points = typeof rule.points === 'function' ? rule.points(subject, body) : [];
+                        const deadline = rule.deadline || extractDeadlines(body + " " + subject);
+                        return {
+                            id: id,
+                            sender: sender,
+                            subject: rule.translated,
+                            isTranslated: true,
+                            originalSubject: subject,
+                            originalBody: body,
+                            translatedBody: transBody,
+                            date: date,
+                            importance: rule.importance,
+                            category: rule.category,
+                            summary: rule.summary,
+                            reason: rule.reason,
+                            keyPoints: points,
+                            deadline: deadline,
+                            action_items: [...rule.actions],
+                            body: transBody,
+                            rawBody: body
+                        };
+                    }
+                }
+                return await processGenericEnglishEmailAsync(subject, body, sender, date, id);
+            }
+
+            const parsed = processKoreanEmail(subject, body, sender, date, id);
+            parsed.translatedBody = parsed.body;
+            return parsed;
+        }
+
+        // Master Synchronous Email Processing & Structuring Function (Fallback)
         function processAndStructureEmail(subject, body, sender, date, id) {
             subject = decodeHtmlEntities(subject || "(제목 없음)").trim();
             body = decodeHtmlEntities(body || "").trim();
@@ -1717,6 +1938,7 @@
             if (isEng) {
                 for (let rule of ENGLISH_RULES) {
                     if (rule.pattern.test(subject) || rule.pattern.test(body)) {
+                        const transBody = fallbackTranslateWords(body);
                         const points = typeof rule.points === 'function' ? rule.points(subject, body) : [];
                         const deadline = rule.deadline || extractDeadlines(body + " " + subject);
                         return {
@@ -1725,6 +1947,8 @@
                             subject: rule.translated,
                             isTranslated: true,
                             originalSubject: subject,
+                            originalBody: body,
+                            translatedBody: transBody,
                             date: date,
                             importance: rule.importance,
                             category: rule.category,
@@ -1733,7 +1957,7 @@
                             keyPoints: points,
                             deadline: deadline,
                             action_items: [...rule.actions],
-                            body: body,
+                            body: transBody,
                             rawBody: body
                         };
                     }
@@ -1741,7 +1965,9 @@
                 return processGenericEnglishEmail(subject, body, sender, date, id);
             }
 
-            return processKoreanEmail(subject, body, sender, date, id);
+            const parsed = processKoreanEmail(subject, body, sender, date, id);
+            parsed.translatedBody = parsed.body;
+            return parsed;
         }
 
         // Backward compatibility alias
@@ -1885,7 +2111,7 @@
                         }
 
                         const snippet = msgData.snippet || subject;
-                        return processAndStructureEmail(
+                        return await processAndStructureEmailAsync(
                             subject,
                             snippet,
                             sender.replace(/([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)/, '***@$2'),
@@ -1920,7 +2146,7 @@
                 updateGoogleLoginState(true, newEmails.length);
                 closeGmailModal();
 
-                alert(`🎉 실제 본인의 최신 Gmail ${newEmails.length}건을 성공적으로 불러와 AI 분류를 완료했습니다!`);
+                alert(`🎉 실제 본인의 최신 Gmail ${newEmails.length}건을 성공적으로 불러와 AI 분류 및 한글 번역을 완료했습니다!`);
             } catch (err) {
                 console.error("fetchRealGmailMessages Exception:", err);
                 alert(`Gmail 데이터 가져오기 실패: ${err.message}`);
@@ -1928,7 +2154,7 @@
             }
         }
 
-        function simulateGoogleGmailFetch() {
+        async function simulateGoogleGmailFetch() {
             const rawSimulated = [
                 {
                     id: "gmail-user-01",
@@ -1953,13 +2179,13 @@
                 }
             ];
 
-            const simulated = rawSimulated.map(item => processAndStructureEmail(
+            const simulated = await Promise.all(rawSimulated.map(item => processAndStructureEmailAsync(
                 item.subject,
                 item.body,
                 item.sender,
                 item.date,
                 item.id
-            ));
+            )));
 
             emailsData.unshift(...simulated);
             localStorage.setItem("user_real_emails", JSON.stringify(emailsData));
@@ -1972,68 +2198,70 @@
         }
 
         // EML File Drag & Drop Handler
-        function handleEmlFileSelect(event) {
+        async function handleEmlFileSelect(event) {
             const files = event.target.files;
             if (!files || files.length === 0) return;
 
             const feedback = document.getElementById("eml-upload-feedback");
-            feedback.innerHTML = `<span class="text-blue-600 font-bold">파일 파싱 및 AI 분류 중...</span>`;
+            feedback.innerHTML = `<span class="text-blue-600 font-bold">파일 파싱 및 AI 한글 번역/분류 중...</span>`;
 
-            let processed = 0;
-            Array.from(files).forEach((file, idx) => {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const text = e.target.result;
-                    // Simple MIME parsing
-                    let subject = file.name.replace(/\.eml$/i, '');
-                    let sender = "업로드 메일";
-                    let date = "오늘";
-                    let body = "";
+            const fileList = Array.from(files);
+            const parsedList = [];
 
-                    const lines = text.split(/\r?\n/);
-                    let isHeader = true;
-                    const bodyLines = [];
+            for (let idx = 0; idx < fileList.length; idx++) {
+                const file = fileList[idx];
+                const text = await file.text();
 
-                    for (let line of lines) {
-                        if (isHeader) {
-                            if (line.trim() === "") {
-                                isHeader = false;
-                                continue;
-                            }
-                            if (line.toLowerCase().startsWith("subject:")) {
-                                subject = line.substring(8).trim();
-                            } else if (line.toLowerCase().startsWith("from:")) {
-                                sender = line.substring(5).trim();
-                            } else if (line.toLowerCase().startsWith("date:")) {
-                                date = line.substring(5).trim();
-                            }
-                        } else {
-                            bodyLines.push(line);
+                let subject = file.name.replace(/\.eml$/i, '');
+                let sender = "업로드 메일";
+                let date = "오늘";
+
+                const lines = text.split(/\r?\n/);
+                let isHeader = true;
+                const bodyLines = [];
+
+                for (let line of lines) {
+                    if (isHeader) {
+                        if (line.trim() === "") {
+                            isHeader = false;
+                            continue;
                         }
+                        if (line.toLowerCase().startsWith("subject:")) {
+                            subject = line.substring(8).trim();
+                        } else if (line.toLowerCase().startsWith("from:")) {
+                            sender = line.substring(5).trim();
+                        } else if (line.toLowerCase().startsWith("date:")) {
+                            date = line.substring(5).trim();
+                        }
+                    } else {
+                        bodyLines.push(line);
                     }
+                }
 
-                    body = bodyLines.join("\n").replace(/<[^>]*>?/gm, ' ').replace(/\s+/g, ' ').trim().substring(0, 800);
-                    if (!body) body = subject;
+                let body = bodyLines.join("\n").replace(/<[^>]*>?/gm, ' ').replace(/\s+/g, ' ').trim().substring(0, 800);
+                if (!body) body = subject;
 
-                    const structured = processAndStructureEmail(subject, body, sender, date.substring(0, 25), `eml-${Date.now()}-${idx}`);
-                    emailsData.unshift(structured);
+                const structured = await processAndStructureEmailAsync(
+                    subject,
+                    body,
+                    sender,
+                    date.substring(0, 25),
+                    `eml-${Date.now()}-${idx}`
+                );
+                parsedList.push(structured);
+            }
 
-                    processed++;
-                    if (processed === files.length) {
-                        localStorage.setItem("user_real_emails", JSON.stringify(emailsData));
-                        updateBadgesAndCounters();
-                        renderBriefing();
-                        renderInbox();
-                        renderCharts();
-                        feedback.innerHTML = `<span class="text-emerald-600 font-bold">✓ ${processed}개 메일 파일 분류 완료!</span>`;
-                        setTimeout(() => {
-                            closeGmailModal();
-                            alert(`🎉 ${processed}개의 실제 메일(.eml)을 파싱하여 AI 분류 및 정리를 완료했습니다!`);
-                        }, 500);
-                    }
-                };
-                reader.readAsText(file);
-            });
+            emailsData.unshift(...parsedList);
+            localStorage.setItem("user_real_emails", JSON.stringify(emailsData));
+            updateBadgesAndCounters();
+            renderBriefing();
+            renderInbox();
+            renderCharts();
+            feedback.innerHTML = `<span class="text-emerald-600 font-bold">✓ ${parsedList.length}개 메일 파일 번역 및 분류 완료!</span>`;
+            setTimeout(() => {
+                closeGmailModal();
+                alert(`🎉 ${parsedList.length}개의 실제 메일(.eml)을 파싱하여 AI 한글 번역 및 일목요연 정리를 완료했습니다!`);
+            }, 500);
         }
 
         // Direct Text Input
@@ -2053,7 +2281,7 @@
             }
         }
 
-        function runDirectClassification() {
+        async function runDirectClassification() {
             const subject = document.getElementById('direct-subject').value.trim();
             const sender = document.getElementById('direct-sender').value.trim() || "직접 입력 발신자";
             const body = document.getElementById('direct-body').value.trim();
@@ -2063,7 +2291,7 @@
                 return;
             }
 
-            const structured = processAndStructureEmail(subject, body, sender, "방금 전", `direct-${Date.now()}`);
+            const structured = await processAndStructureEmailAsync(subject, body, sender, "방금 전", `direct-${Date.now()}`);
             emailsData.unshift(structured);
             localStorage.setItem("user_real_emails", JSON.stringify(emailsData));
 
@@ -2072,24 +2300,34 @@
             renderInbox();
             renderCharts();
             closeGmailModal();
-            alert(`🎉 AI 분석 완료: [${structured.importance}] ${structured.category}로 분류되어 수신함에 일목요연하게 정리되었습니다!`);
+            alert(`🎉 AI 분석 및 한글 번역 완료: [${structured.importance}] ${structured.category}로 분류되어 수신함에 일목요연하게 정리되었습니다!`);
         }
 
         // Initialize on load
-        window.addEventListener("DOMContentLoaded", () => {
+        window.addEventListener("DOMContentLoaded", async () => {
             const savedUserEmails = localStorage.getItem("user_real_emails");
             if (savedUserEmails) {
                 try {
                     const parsed = JSON.parse(savedUserEmails);
                     if (Array.isArray(parsed) && parsed.length > 0) {
-                        emailsData = parsed.map((e, idx) => processAndStructureEmail(
-                            e.originalSubject || e.rawSubject || e.subject,
-                            e.rawBody || e.body || e.snippet || "",
-                            e.sender,
-                            e.date,
-                            e.id || `saved-${idx}`
-                        ));
-                        localStorage.setItem("user_real_emails", JSON.stringify(emailsData));
+                        // Check if cached emails have untranslated English text
+                        const hasEnglishEmails = parsed.some(e => {
+                            const checkStr = (e.originalSubject || e.subject || "") + " " + (e.rawBody || e.body || "");
+                            return isEnglishText(checkStr) && (!e.translatedBody || isEnglishText(e.subject));
+                        });
+
+                        if (hasEnglishEmails) {
+                            emailsData = await Promise.all(parsed.map((e, idx) => processAndStructureEmailAsync(
+                                e.originalSubject || e.rawSubject || e.subject,
+                                e.rawBody || e.originalBody || e.body || e.snippet || "",
+                                e.sender,
+                                e.date,
+                                e.id || `saved-${idx}`
+                            )));
+                            localStorage.setItem("user_real_emails", JSON.stringify(emailsData));
+                        } else {
+                            emailsData = parsed;
+                        }
                     }
                 } catch (err) {
                     console.error("Failed to parse savedUserEmails:", err);
