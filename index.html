@@ -66,7 +66,6 @@
                 <div>
                     <div class="flex items-center space-x-2">
                         <span class="font-extrabold text-lg text-slate-900 tracking-tight">SmartMail AI</span>
-                        <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">SK AIGEN 지원</span>
                         <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 flex items-center gap-1">
                             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> 24/7 Always Online
                         </span>
@@ -102,9 +101,6 @@
             </button>
             <button onclick="switchTab('analytics')" id="tab-btn-analytics" class="tab-btn py-3 text-sm font-medium text-slate-600 hover:text-slate-900 border-b-2 border-transparent flex items-center gap-2 whitespace-nowrap">
                 <i data-lucide="bar-chart-3" class="w-4 h-4"></i> 성과 분석 & 지표
-            </button>
-            <button onclick="switchTab('portfolio')" id="tab-btn-portfolio" class="tab-btn py-3 text-sm font-medium text-slate-600 hover:text-slate-900 border-b-2 border-transparent flex items-center gap-2 whitespace-nowrap">
-                <i data-lucide="file-text" class="w-4 h-4"></i> SK AIGEN 포트폴리오 전문
             </button>
         </div>
     </header>
@@ -312,88 +308,6 @@
             </div>
         </section>
 
-        <!-- ================= TAB 5: SK AIGEN 포트폴리오 전문 ================= -->
-        <section id="tab-portfolio" class="hidden space-y-6">
-            <div class="bg-white p-8 sm:p-10 rounded-2xl border border-slate-200 shadow-sm max-w-4xl mx-auto space-y-8">
-                <!-- Header -->
-                <div class="border-b border-slate-200 pb-6">
-                    <div class="inline-block px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-bold mb-3">
-                        SK AIGEN 2년 전일제 과정 지원 포트폴리오
-                    </div>
-                    <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900">
-                        SmartMail & DailyBriefing AI: AI 기반 개인 맞춤형 정보 자동 분류 및 요약 시스템
-                    </h1>
-                    <p class="text-sm text-slate-500 mt-2">
-                        진행 기간: 2026.10 ~ 2026.11 | 역할: 기획, 아키텍처 설계, AI 파이프라인 및 프론트엔드 전주기 1인 개발
-                    </p>
-                </div>
-
-                <!-- 1. Background -->
-                <div class="space-y-3">
-                    <h2 class="text-lg font-bold text-blue-900 border-l-4 border-blue-600 pl-3">1. 기획 배경 및 문제 정의</h2>
-                    <blockquote class="bg-slate-50 border-l-4 border-slate-300 p-4 text-sm text-slate-700 italic rounded-r-lg">
-                        "매일 쏟아지는 메일을 일일이 열어보고 여러 매체에서 뉴스를 직접 찾아 읽는 작업을 당연한 일상으로 넘기지 않고, 정보 탐색의 비효율을 개선하고자 AI 기반 자동화 시스템을 구축한 경험이 있습니다."
-                    </blockquote>
-                    <p class="text-sm text-slate-700 leading-relaxed">
-                        • <strong>수신함 병목:</strong> 일상적으로 수신되는 메일의 70% 이상이 광고와 단순 안내 메일임에도, 중요 메일 누락에 대한 불안감으로 모든 메일을 일일이 확인하는 데 하루 35분 이상 소모되었습니다.<br>
-                        • <strong>정보 탐색 피로도:</strong> 최신 IT, 경제, 시사 흐름을 놓치지 않기 위해 포털별로 검색하고 장문의 기사를 정독하며 일평균 40분의 인지적 에너지가 낭비되었습니다.
-                    </p>
-                </div>
-
-                <!-- 2. System Architecture -->
-                <div class="space-y-3">
-                    <h2 class="text-lg font-bold text-blue-900 border-l-4 border-blue-600 pl-3">2. 시스템 아키텍처 및 듀얼 엔진 설계</h2>
-                    <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 text-xs sm:text-sm text-slate-800 font-mono space-y-2">
-                        <div class="font-bold text-slate-900 pb-2 border-b border-slate-200">[System Pipeline Architecture]</div>
-                        <div>1. 데이터 수집 ➔ [이메일 수신함 (IMAP/Data) + 주요 언론사 RSS 3개 도메인]</div>
-                        <div>2. 텍스트 전처리 ➔ [BeautifulSoup HTML 클렌징 + 정규표현식 바이라인 노이즈 제거]</div>
-                        <div>3. 지능형 듀얼 엔진:</div>
-                        <div class="pl-4 text-blue-700">• Online: Gemini 1.5 Flash (Contextual Zero-shot & Structured JSON Output)</div>
-                        <div class="pl-4 text-emerald-700">• Fallback: 한국어 형태소/패턴 기반 Heuristic NLP 규칙 엔진 (Offline 100% 보장)</div>
-                        <div>4. 결과 표출 ➔ [GitHub Pages 기반 24/7 무중단 모닝 브리핑 웹 대시보드]</div>
-                    </div>
-                </div>
-
-                <!-- 3. Troubleshooting -->
-                <div class="space-y-4">
-                    <h2 class="text-lg font-bold text-blue-900 border-l-4 border-blue-600 pl-3">3. 기술적 난관 및 트러블슈팅 (Troubleshooting)</h2>
-                    
-                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-2">
-                        <div class="text-xs font-bold text-red-600">[트러블슈팅 1] LLM 비정형 출력으로 인한 파싱 에러(JSONDecodeError) 차단</div>
-                        <p class="text-xs text-slate-600">
-                            <strong>원인:</strong> LLM이 JSON 외에 설명문이나 마크다운 텍스트를 출력하여 시스템 다운 발생.<br>
-                            <strong>해결:</strong> API 호출 시 <code>responseMimeType: "application/json"</code> 강제 및 파이썬/JS 단에서 정규식 추출 2중 방어 로직을 적용해 파싱 성공률 100% 달성.
-                        </p>
-                    </div>
-
-                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-2">
-                        <div class="text-xs font-bold text-blue-600">[트러블슈팅 2] 제목에 [긴급] 태그가 없는 중요 메일 누락 방지</div>
-                        <p class="text-xs text-slate-600">
-                            <strong>원인:</strong> 제목에 태그가 없으나 본문에 "내일까지 검토 부탁드립니다"와 같은 중요 마감 요청이 존재할 경우 일반 메일로 오분류 위험.<br>
-                            <strong>해결:</strong> 본문 내 마감 시한 패턴(<code>금일 \d+시</code>, <code>내일까지</code>)과 행동 유도 키워드(<code>검토</code>, <code>승인</code>, <code>회신</code>)를 교차 스코어링하여 긴급도 탐지율 100% 확보.
-                        </p>
-                    </div>
-
-                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-2">
-                        <div class="text-xs font-bold text-emerald-600">[트러블슈팅 3] 호스팅 플랫폼 잠김 현상(Streamlit Sleep) 극복</div>
-                        <p class="text-xs text-slate-600">
-                            <strong>원인:</strong> 무료 클라우드 대시보드는 일정 시간 방문자가 없으면 서버가 절전 모드로 전환되어 평가자 열람 시 로딩 지연 유발.<br>
-                            <strong>해결:</strong> 서버리스 정적 아키텍처(HTML/JS + GitHub Pages)로 전면 마이그레이션하여 24시간 365일 무지연 즉시 응답 체계 구축.
-                        </p>
-                    </div>
-                </div>
-
-                <!-- 4. SK AIGEN Vision -->
-                <div class="space-y-3">
-                    <h2 class="text-lg font-bold text-blue-900 border-l-4 border-blue-600 pl-3">4. SK AIGEN 교육 과정과의 연계성 및 포부</h2>
-                    <p class="text-sm text-slate-700 leading-relaxed">
-                        본 프로젝트를 통해 "일상의 문제를 기술로 전환하는 문제 해결력"과 "안정적인 소프트웨어 엔지니어링"의 기초를 다졌습니다. 향후 본 프로토타입을 개인 메일 히스토리를 기억하는 **RAG(검색 증강 생성) 기반 맞춤형 문맥 참조** 및 **경량 SLM(Small Language Model) 온디바이스 파인튜닝**, **자율 에이전트(Autonomous Agent)**로 발전시키고자 합니다.  
-                        SK AIGEN의 2년 전일제 심화 커리큘럼(MLOps, 대규모 분산 데이터 처리, 최신 LLM 에이전트 아키텍처)에 전념하여, 단순한 모델 사용자를 넘어 복잡한 현실의 문제를 기술로 해결하는 **실무형 핵심 AI 엔지니어**로 성장하겠습니다.
-                    </p>
-                </div>
-            </div>
-        </section>
-
     </main>
 
     <!-- Modal for Email Detail -->
@@ -583,7 +497,7 @@
                     "산학 연계 프로젝트 중심의 실무 커리큘럼을 통해 현업 투입 즉시 성과를 내는 엔지니어를 양성할 계획입니다.",
                     "기업들의 실무형 AI 인재 채용 수요와 맞물려 큰 호응을 얻고 있습니다."
                 ],
-                takeaway: "실무 프로젝트 기반 전일제 집중 과정(SK AIGEN)의 필요성과 비전 부합"
+                takeaway: "실무 AI 프로젝트 기반의 기술 역량 검증 및 엔지니어 육성 흐름과 부합"
             }
         ];
 
@@ -593,15 +507,17 @@
 
         // Tab Switcher
         function switchTab(tabId) {
-            ['briefing', 'inbox', 'news', 'analytics', 'portfolio'].forEach(t => {
+            ['briefing', 'inbox', 'news', 'analytics'].forEach(t => {
                 const el = document.getElementById(`tab-${t}`);
                 const btn = document.getElementById(`tab-btn-${t}`);
-                if (t === tabId) {
-                    el.classList.remove('hidden');
-                    btn.classList.add('active');
-                } else {
-                    el.classList.add('hidden');
-                    btn.classList.remove('active');
+                if (el && btn) {
+                    if (t === tabId) {
+                        el.classList.remove('hidden');
+                        btn.classList.add('active');
+                    } else {
+                        el.classList.add('hidden');
+                        btn.classList.remove('active');
+                    }
                 }
             });
             lucide.createIcons();
@@ -830,72 +746,85 @@
         }
 
         // Render Charts in Analytics Tab
-        let chartsRendered = false;
+        let timeChartInstance = null;
+        let pieChartInstance = null;
         function renderCharts() {
-            if (chartsRendered) return;
-            chartsRendered = true;
-
             // 1. Time comparison bar chart
-            const ctx1 = document.getElementById('timeComparisonChart').getContext('2d');
-            new Chart(ctx1, {
-                type: 'bar',
-                data: {
-                    labels: ['수신 메일 확인 및 정리', '뉴스 검색 및 정독', '아침 일과 총 준비 시간'],
-                    datasets: [
-                        {
-                            label: '도입 전 (기존 수작업)',
-                            data: [35, 40, 75],
-                            backgroundColor: '#94a3b8',
-                            borderRadius: 6
-                        },
-                        {
-                            label: '도입 후 (AI 자동화 시스템)',
-                            data: [7, 8, 15],
-                            backgroundColor: '#2563eb',
-                            borderRadius: 6
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom' }
+            const canvas1 = document.getElementById('timeComparisonChart');
+            if (canvas1 && !timeChartInstance) {
+                const ctx1 = canvas1.getContext('2d');
+                timeChartInstance = new Chart(ctx1, {
+                    type: 'bar',
+                    data: {
+                        labels: ['수신 메일 확인 및 정리', '뉴스 검색 및 정독', '아침 일과 총 준비 시간'],
+                        datasets: [
+                            {
+                                label: '도입 전 (기존 수작업)',
+                                data: [35, 40, 75],
+                                backgroundColor: '#94a3b8',
+                                borderRadius: 6
+                            },
+                            {
+                                label: '도입 후 (AI 자동화 시스템)',
+                                data: [7, 8, 15],
+                                backgroundColor: '#2563eb',
+                                borderRadius: 6
+                            }
+                        ]
                     },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: { display: true, text: '소요 시간 (분)' }
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom' }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: { display: true, text: '소요 시간 (분)' }
+                            }
                         }
                     }
-                }
-            });
+                });
+            }
 
             // 2. Category Pie Chart
-            const ctx2 = document.getElementById('categoryPieChart').getContext('2d');
-            const counts = {
-                '긴급 업무': emailsData.filter(e => e.category === '긴급 업무').length,
-                '일반 업무': emailsData.filter(e => e.category === '일반 업무').length,
-                '단순 공지': emailsData.filter(e => e.category === '단순 공지').length,
-                '광고/홍보': emailsData.filter(e => e.category === '광고/홍보').length
-            };
-            new Chart(ctx2, {
-                type: 'doughnut',
-                data: {
-                    labels: ['긴급 업무', '일반 업무', '단순 공지', '광고/홍보'],
-                    datasets: [{
-                        data: [counts['긴급 업무'], counts['일반 업무'], counts['단순 공지'], counts['광고/홍보']],
-                        backgroundColor: ['#ef4444', '#3b82f6', '#f59e0b', '#cbd5e1']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom' }
-                    }
+            const canvas2 = document.getElementById('categoryPieChart');
+            if (canvas2) {
+                const counts = {
+                    '긴급 업무': emailsData.filter(e => e.category === '긴급 업무').length,
+                    '일반 업무': emailsData.filter(e => e.category === '일반 업무').length,
+                    '단순 공지': emailsData.filter(e => e.category === '단순 공지').length,
+                    '광고/홍보': emailsData.filter(e => e.category === '광고/홍보').length
+                };
+                const pieData = emailsData.length > 0 
+                    ? [counts['긴급 업무'], counts['일반 업무'], counts['단순 공지'], counts['광고/홍보']]
+                    : [0, 0, 0, 0];
+
+                if (pieChartInstance) {
+                    pieChartInstance.data.datasets[0].data = pieData;
+                    pieChartInstance.update();
+                } else {
+                    const ctx2 = canvas2.getContext('2d');
+                    pieChartInstance = new Chart(ctx2, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['긴급 업무', '일반 업무', '단순 공지', '광고/홍보'],
+                            datasets: [{
+                                data: pieData,
+                                backgroundColor: ['#ef4444', '#3b82f6', '#f59e0b', '#cbd5e1']
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { position: 'bottom' }
+                            }
+                        }
+                    });
                 }
-            });
+            }
         }
 
         // ================= Gmail & Custom Mail Logic =================
@@ -1208,11 +1137,11 @@
                 {
                     id: "gmail-user-02",
                     sender: "GitHub Notifications <notifications@github.com>",
-                    subject: "[긴급] SK AIGEN 프로젝트 pull request #12 코드 리뷰 및 승인 요청",
+                    subject: "[긴급] AI 파이프라인 프로젝트 pull request #12 코드 리뷰 및 승인 요청",
                     date: "오늘 10:20",
                     importance: "HIGH",
                     category: "긴급 업무",
-                    summary: "SK AIGEN 프로젝트 PR 코드 리뷰 및 메인 브랜치 병합 승인 요청",
+                    summary: "AI 파이프라인 프로젝트 PR 코드 리뷰 및 메인 브랜치 병합 승인 요청",
                     reason: "코드 리뷰 및 마감 승인 요청 액션 감지로 HIGH 분류",
                     action_items: ["PR #12 변경 사항 검토", "단위 테스트 통과 확인 후 병합"],
                     body: "팀원으로부터 새로운 PR이 등록되었습니다. 메일 분류 파이프라인 최적화 커밋에 대한 리뷰를 금일 중으로 완료해 주시기 바랍니다."
@@ -1316,7 +1245,7 @@
         // Direct Text Input
         function fillDirectSample(type) {
             if (type === 'urgent') {
-                document.getElementById('direct-subject').value = "[긴급] SK AIGEN 최종 발표 자료 검토 및 오늘 18시까지 피드백 요청";
+                document.getElementById('direct-subject').value = "[긴급] 최종 기획서 및 성과 지표 검토 후 오늘 18시까지 피드백 요청";
                 document.getElementById('direct-sender').value = "박서준 PM <sjpark@company.com>";
                 document.getElementById('direct-body').value = "성훈 님, 오늘 오후 6시까지 첨부된 최종 발표 슬라이드의 아키텍처 및 정량 성과 지표를 검토해 주시기 바랍니다. 이상 없으시면 승인 부탁드립니다.";
             } else if (type === 'promo') {

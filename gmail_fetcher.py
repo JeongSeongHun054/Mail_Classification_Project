@@ -183,3 +183,4 @@ if __name__ == '__main__':
             update_portfolio_data(emails)
     except Exception as e:
         print(f"\n❌ 오류 발생: {e}")
+
