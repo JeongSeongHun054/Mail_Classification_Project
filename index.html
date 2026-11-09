@@ -168,23 +168,37 @@
 
         <!-- ================= TAB 2: 스마트 수신함 ================= -->
         <section id="tab-inbox" class="hidden space-y-6">
-            <!-- Mail Connect Hero Banner -->
-            <div class="bg-gradient-to-r from-red-50 via-orange-50 to-amber-50 p-5 rounded-2xl border border-red-200/80 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div class="flex items-center gap-3.5">
-                    <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-red-500 to-rose-600 text-white flex items-center justify-center font-bold shadow-md shadow-red-500/20">
-                        <i data-lucide="mail-check" class="w-6 h-6"></i>
+            <!-- Google One-Click Login Hero Banner -->
+            <div class="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/90 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-200 shadow-sm flex items-center justify-center p-2.5">
+                        <svg class="w-7 h-7" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.66v3.04h3.88c2.27-2.09 3.665-5.17 3.665-9.14z"/>
+                            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.04c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.27v3.13C3.25 21.31 7.34 24 12 24z"/>
+                            <path fill="#FBBC05" d="M5.28 14.28c-.25-.72-.38-1.49-.38-2.28s.13-1.56.38-2.28V6.59H1.27C.46 8.2.005 10.05.005 12s.46 3.8 1.265 5.41l4.01-3.13z"/>
+                            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.25 2.69 1.27 6.59l4.01 3.13c.95-2.83 3.6-4.97 6.72-4.97z"/>
+                        </svg>
                     </div>
                     <div>
                         <div class="flex items-center gap-2">
-                            <h3 class="text-base font-extrabold text-slate-900">내 실제 메일 수신함 불러와서 AI 분류하기</h3>
-                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700">Gmail OAuth 지원</span>
+                            <h3 class="text-base font-extrabold text-slate-900">내 실제 Gmail 계정으로 로그인 & 자동 분류</h3>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">Google OAuth 2.0</span>
                         </div>
-                        <p class="text-xs text-slate-600 mt-0.5">Google 계정으로 로그인하여 실제 Gmail 수신함을 가져오거나, 다운로드한 메일 파일(.eml)을 올려 실시간 AI 분류를 체험해보세요.</p>
+                        <p class="text-xs text-slate-500 mt-0.5">Google 계정으로 로그인하면 수신함 최신 이메일을 실시간으로 가져와 AI가 중요도와 To-Do를 즉시 분류합니다.</p>
                     </div>
                 </div>
-                <div class="flex items-center gap-2 w-full sm:w-auto">
-                    <button onclick="openGmailModal()" class="w-full sm:w-auto px-4 py-2 text-xs font-bold rounded-xl bg-red-600 hover:bg-red-700 text-white flex items-center justify-center gap-2 shadow-sm shadow-red-500/25 transition">
-                        <i data-lucide="sparkles" class="w-4 h-4"></i> 내 메일 가져오기
+                <div id="google-auth-area" class="w-full md:w-auto flex items-center gap-3">
+                    <button onclick="handleOneClickGoogleLogin()" id="btn-google-main" class="w-full md:w-auto px-5 py-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 text-xs font-bold shadow-sm flex items-center justify-center gap-2.5 transition active:scale-95">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.66v3.04h3.88c2.27-2.09 3.665-5.17 3.665-9.14z"/>
+                            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.04c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.27v3.13C3.25 21.31 7.34 24 12 24z"/>
+                            <path fill="#FBBC05" d="M5.28 14.28c-.25-.72-.38-1.49-.38-2.28s.13-1.56.38-2.28V6.59H1.27C.46 8.2.005 10.05.005 12s.46 3.8 1.265 5.41l4.01-3.13z"/>
+                            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.25 2.69 1.27 6.59l4.01 3.13c.95-2.83 3.6-4.97 6.72-4.97z"/>
+                        </svg>
+                        <span>Google 계정으로 로그인 & 내 메일 분류</span>
+                    </button>
+                    <button onclick="openGmailModal()" title="메일 파일 업로드 및 기타 옵션" class="px-3 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-semibold">
+                        <i data-lucide="more-horizontal" class="w-4 h-4"></i>
                     </button>
                 </div>
             </div>
@@ -1046,47 +1060,78 @@
         }
 
         // Google Identity Services OAuth Sign-In
+        let GOOGLE_CLIENT_ID = localStorage.getItem("g_client_id") || "";
         let tokenClient;
-        function triggerGoogleSignIn() {
-            const statusEl = document.getElementById("oauth-status");
-            const customClientId = document.getElementById("google-client-id").value.trim();
 
-            if (!customClientId) {
-                // If no Client ID entered, guide user or offer 1-click mock simulation
-                const confirmSim = confirm(
-                    "💡 Google Cloud OAuth Client ID가 아직 입력되지 않았습니다.\n\n" +
-                    "[확인]: 실제 Gmail 연동 가이드 및 데모 시뮬레이션으로 수신함 갱신\n" +
-                    "[취소]: Google Cloud Console에서 Client ID 발급 후 입력"
-                );
-                if (confirmSim) {
-                    simulateGoogleGmailFetch();
-                } else {
-                    window.open("https://console.cloud.google.com/apis/credentials", "_blank");
-                }
+        function handleOneClickGoogleLogin() {
+            if (!GOOGLE_CLIENT_ID) {
+                openGoogleSetupModal();
                 return;
             }
 
-            localStorage.setItem("g_client_id", customClientId);
-            statusEl.classList.remove("hidden");
-            statusEl.innerHTML = `<span class="text-blue-600 font-bold">Google 로그인 팝업 호출 중...</span>`;
-
             try {
                 tokenClient = google.accounts.oauth2.initTokenClient({
-                    client_id: customClientId,
+                    client_id: GOOGLE_CLIENT_ID,
                     scope: 'https://www.googleapis.com/auth/gmail.readonly',
                     callback: async (resp) => {
                         if (resp.error) {
-                            statusEl.innerHTML = `<span class="text-red-600 font-bold">OAuth 오류: ${resp.error}</span>`;
+                            alert("Google 로그인 실패: " + resp.error);
                             return;
                         }
-                        statusEl.innerHTML = `<span class="text-blue-600 font-bold">Gmail 수신함에서 최신 메일 수집 중...</span>`;
+                        updateGoogleLoginState(true);
                         await fetchRealGmailMessages(resp.access_token);
                     }
                 });
                 tokenClient.requestAccessToken({ prompt: 'consent' });
             } catch (err) {
-                statusEl.innerHTML = `<span class="text-red-600 font-bold">Google 연동 초기화 실패: ${err.message}</span>`;
+                alert("Google OAuth 라이브러리 호출 실패: " + err.message);
             }
+        }
+
+        function openGoogleSetupModal() {
+            const clientVal = prompt(
+                "🔑 Google OAuth 연동 안내\n\n" +
+                "Google 보안 정책상 깃허브 웹페이지에서 사용자의 실제 Gmail을 긁어오려면 Google Cloud에서 발급한 'OAuth 클라이언트 ID'가 필요합니다.\n\n" +
+                "• 발급받은 클라이언트 ID가 있다면 아래에 붙여넣어 주세요.\n" +
+                "• 아직 없다면 빈칸으로 두고 [확인]을 누르면 '체험용 Gmail 연동 시뮬레이션'으로 즉시 수신함을 분류합니다.",
+                ""
+            );
+
+            if (clientVal === null) return;
+
+            if (clientVal.trim().includes(".apps.googleusercontent.com")) {
+                GOOGLE_CLIENT_ID = clientVal.trim();
+                localStorage.setItem("g_client_id", GOOGLE_CLIENT_ID);
+                alert("✓ Google Client ID가 저장되었습니다. Google 로그인을 다시 클릭해 주세요!");
+                handleOneClickGoogleLogin();
+            } else {
+                // Run immediate realistic Google account simulation
+                simulateGoogleGmailFetch();
+            }
+        }
+
+        function updateGoogleLoginState(isLoggedIn) {
+            const area = document.getElementById("google-auth-area");
+            if (isLoggedIn) {
+                area.innerHTML = `
+                    <div class="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold shadow-sm">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span>Google 계정 연동 완료</span>
+                        <button onclick="handleGoogleLogout()" class="text-[11px] text-slate-400 hover:text-red-600 underline ml-2">로그아웃</button>
+                    </div>
+                `;
+            } else {
+                location.reload();
+            }
+        }
+
+        function handleGoogleLogout() {
+            localStorage.removeItem("g_client_id");
+            location.reload();
+        }
+
+        function triggerGoogleSignIn() {
+            handleOneClickGoogleLogin();
         }
 
         async function fetchRealGmailMessages(token) {
