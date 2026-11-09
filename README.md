@@ -15,7 +15,7 @@
 > 기존 무료 호스팅 플랫폼(Streamlit Community Cloud 등)은 방문자가 없을 때 서버가 절전 모드로 잠기는(Sleep) 치명적인 단점이 있어 평가자가 열람할 때 로딩 지연이 발생합니다.  
 > 본 프로젝트는 **GitHub Pages 기반의 정적 웹 아키텍처**로 구현되어 **24시간 365일 지연 없이 즉시 열람**할 수 있습니다.
 
-* **GitHub Pages 배포 주소:** `https://<여러분의_GitHub_ID>.github.io/Mail-Classification-Project/`
+* **GitHub Pages 배포 주소:** `https://jeongseonghun054.github.io/Mail_Classification_Project/`
 * **로컬 즉시 실행:** 브라우저에서 `index.html` 파일을 더블 클릭하면 별도의 서버 기동 없이도 로컬에서 100% 동작합니다.
 
 ---
@@ -83,13 +83,14 @@ graph TD
    ```bash
    git add .
    git commit -m "feat: Deploy SmartMail & DailyBriefing AI on GitHub Pages"
-   git remote add origin https://github.com/<본인_계정>/Mail-Classification-Project.git
-   git push -u origin master
+   git remote add origin https://github.com/JeongSeongHun054/Mail_Classification_Project.git
+   git branch -M main
+   git push -u origin main
    ```
 2. GitHub 저장소의 **[Settings] ➔ [Pages]** 탭으로 이동합니다.
 3. **Build and deployment** 항목의 Source를 **Deploy from a branch**로 선택합니다.
-4. Branch를 `master` (또는 `main`), 폴더를 `/ (root)`로 선택하고 **Save**를 누릅니다.
-5. 약 1분 후 `https://<본인_계정>.github.io/Mail-Classification-Project/` 링크로 전 세계 어디서나 24시간 무중단 접속이 가능합니다!
+4. Branch를 `main`, 폴더를 `/ (root)`로 선택하고 **Save**를 누릅니다.
+5. 약 1분 후 `https://jeongseonghun054.github.io/Mail_Classification_Project/` 링크로 전 세계 어디서나 24시간 무중단 접속이 가능합니다!
 
 ---
 
