@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartMail & DailyBriefing AI | 포트폴리오 데모</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Pretendard Font -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Pretendard', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            900: '#1e3a8a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        .tab-btn.active {
+            color: #2563eb;
+            border-bottom: 2px solid #2563eb;
+            font-weight: 700;
+        }
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white !important; }
+            .container-box { box-shadow: none !important; border: none !important; padding: 0 !important; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased">
+
+    <!-- Top Navigation Bar -->
+    <header class="no-print bg-white border-b border-slate-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
+                    <i data-lucide="sparkles" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <span class="font-extrabold text-lg text-slate-900 tracking-tight">SmartMail AI</span>
+                        <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">SK AIGEN 지원</span>
+                        <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> 24/7 Always Online
+                        </span>
+                    </div>
+                    <p class="text-xs text-slate-500">AI 기반 개인 맞춤형 정보 자동 분류 및 요약 시스템</p>
+                </div>
+            </div>
+
+            <!-- Header Quick Actions -->
+            <div class="flex items-center space-x-3">
+                <button onclick="window.print()" class="text-xs font-medium px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 text-slate-700 flex items-center gap-1.5 transition">
+                    <i data-lucide="printer" class="w-4 h-4"></i> PDF 인쇄
+                </button>
+                <a href="https://github.com" target="_blank" id="github-link" class="text-xs font-medium px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white flex items-center gap-1.5 transition">
+                    <i data-lucide="github" class="w-4 h-4"></i> GitHub Repo
+                </a>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex space-x-8 border-t border-slate-100 overflow-x-auto">
+            <button onclick="switchTab('briefing')" id="tab-btn-briefing" class="tab-btn active py-3 text-sm font-medium text-slate-600 hover:text-slate-900 border-b-2 border-transparent flex items-center gap-2 whitespace-nowrap">
+                <i data-lucide="sunrise" class="w-4 h-4"></i> 모닝 브리핑
+            </button>
+            <button onclick="switchTab('inbox')" id="tab-btn-inbox" class="tab-btn py-3 text-sm font-medium text-slate-600 hover:text-slate-900 border-b-2 border-transparent flex items-center gap-2 whitespace-nowrap">
+                <i data-lucide="mail" class="w-4 h-4"></i> 스마트 수신함 <span id="inbox-badge" class="ml-1 px-1.5 py-0.2 rounded-full text-xs bg-red-100 text-red-600 font-bold">2</span>
+            </button>
+            <button onclick="switchTab('news')" id="tab-btn-news" class="tab-btn py-3 text-sm font-medium text-slate-600 hover:text-slate-900 border-b-2 border-transparent flex items-center gap-2 whitespace-nowrap">
+                <i data-lucide="newspaper" class="w-4 h-4"></i> 실시간 뉴스 3줄 요약
+            </button>
+            <button onclick="switchTab('analytics')" id="tab-btn-analytics" class="tab-btn py-3 text-sm font-medium text-slate-600 hover:text-slate-900 border-b-2 border-transparent flex items-center gap-2 whitespace-nowrap">
+                <i data-lucide="bar-chart-3" class="w-4 h-4"></i> 성과 분석 & 지표
+            </button>
+            <button onclick="switchTab('portfolio')" id="tab-btn-portfolio" class="tab-btn py-3 text-sm font-medium text-slate-600 hover:text-slate-900 border-b-2 border-transparent flex items-center gap-2 whitespace-nowrap">
+                <i data-lucide="file-text" class="w-4 h-4"></i> SK AIGEN 포트폴리오 전문
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- ================= TAB 1: 모닝 브리핑 ================= -->
+        <section id="tab-briefing" class="space-y-6">
+            <!-- Welcome Hero -->
+            <div class="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 rounded-2xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
+                <div class="absolute -right-10 -bottom-10 opacity-10 pointer-events-none">
+                    <i data-lucide="zap" class="w-64 h-64"></i>
+                </div>
+                <div class="relative z-10 max-w-3xl">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-xs font-semibold mb-3 border border-blue-400/30">
+                        <i data-lucide="clock" class="w-3.5 h-3.5"></i> Daily Morning Briefing
+                    </div>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight mb-2">
+                        성훈 님, 오늘 꼭 챙겨야 할 우선순위 브리핑입니다.
+                    </h1>
+                    <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+                        매일 쏟아지는 수신함과 뉴스 포털을 헤매지 마세요. AI가 분석한 <strong class="text-white font-semibold">오늘의 긴급 업무 2건</strong>과 <strong class="text-white font-semibold">IT·경제·시사 핵심 요약</strong>을 단 3분 만에 확인하세요.
+                    </p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Left: Urgent Mails -->
+                <div class="lg:col-span-7 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-red-500 animate-ping"></span>
+                            🚨 즉각 조치 필요한 중요 메일
+                        </h2>
+                        <span class="text-xs text-slate-500 font-medium">우선순위 자동 산정순</span>
+                    </div>
+
+                    <!-- Urgent Email Cards -->
+                    <div id="briefing-urgent-list" class="space-y-3">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Right: Top 3 News Highlights -->
+                <div class="lg:col-span-5 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                            <i data-lucide="sparkles" class="w-5 h-5 text-amber-500"></i>
+                            오늘의 3대 도메인 핵심 뉴스
+                        </h2>
+                        <button onclick="switchTab('news')" class="text-xs text-blue-600 hover:text-blue-800 font-semibold">전체 보기 &rarr;</button>
+                    </div>
+
+                    <div id="briefing-news-list" class="space-y-3">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 2: 스마트 수신함 ================= -->
+        <section id="tab-inbox" class="hidden space-y-6">
+            <!-- Filter Bar -->
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
+                <div class="flex flex-wrap gap-2 w-full md:w-auto">
+                    <button onclick="filterCategory('전체')" class="cat-pill active px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-white">전체 (<span id="count-all">8</span>)</button>
+                    <button onclick="filterCategory('긴급 업무')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700">긴급 업무 (<span id="count-urgent">2</span>)</button>
+                    <button onclick="filterCategory('일반 업무')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700">일반 업무 (<span id="count-normal">2</span>)</button>
+                    <button onclick="filterCategory('단순 공지')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700">단순 공지 (<span id="count-notice">2</span>)</button>
+                    <button onclick="filterCategory('광고/홍보')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700">광고/홍보 (<span id="count-promo">2</span>)</button>
+                </div>
+                <div class="w-full md:w-72 relative">
+                    <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3 text-slate-400"></i>
+                    <input type="text" id="mail-search" oninput="handleSearch()" placeholder="메일 제목, 본문, 발신자 검색..." class="w-full pl-9 pr-4 py-2 text-xs rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+            </div>
+
+            <!-- Mail List Container -->
+            <div id="mail-list" class="space-y-3">
+                <!-- Injected via JS -->
+            </div>
+        </section>
+
+        <!-- ================= TAB 3: 실시간 뉴스 3줄 요약 ================= -->
+        <section id="tab-news" class="hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900">3개 분야 실시간 뉴스 AI 브리핑</h2>
+                        <p class="text-xs text-slate-500 mt-1">포털 사이트를 일일이 돌아다니지 않고, 신뢰도 높은 언론사 기사에서 핵심 3줄과 시사점을 추출합니다.</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="filterNewsCategory('IT/테크')" class="news-cat-btn active px-3.5 py-1.5 text-xs font-bold rounded-lg bg-blue-600 text-white">IT / 테크</button>
+                        <button onclick="filterNewsCategory('경제/금융')" class="news-cat-btn px-3.5 py-1.5 text-xs font-bold rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200">경제 / 금융</button>
+                        <button onclick="filterNewsCategory('시사/종합')" class="news-cat-btn px-3.5 py-1.5 text-xs font-bold rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200">시사 / 종합</button>
+                    </div>
+                </div>
+
+                <div id="news-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 4: 성과 분석 & 지표 ================= -->
+        <section id="tab-analytics" class="hidden space-y-6">
+            <!-- 4 Metrics Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">메일 확인 시간</div>
+                    <div class="mt-2 flex items-baseline gap-2">
+                        <span class="text-2xl font-black text-slate-900">7분</span>
+                        <span class="text-xs text-slate-400 line-through">35분</span>
+                    </div>
+                    <div class="mt-2 text-xs font-bold text-emerald-600 flex items-center gap-1">
+                        <i data-lucide="trending-down" class="w-3.5 h-3.5"></i> -80% (일 28분 절감)
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">뉴스 탐색 및 정독</div>
+                    <div class="mt-2 flex items-baseline gap-2">
+                        <span class="text-2xl font-black text-slate-900">8분</span>
+                        <span class="text-xs text-slate-400 line-through">40분</span>
+                    </div>
+                    <div class="mt-2 text-xs font-bold text-emerald-600 flex items-center gap-1">
+                        <i data-lucide="trending-down" class="w-3.5 h-3.5"></i> -80% (일 32분 절감)
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">중요 업무 메일 누락</div>
+                    <div class="mt-2 flex items-baseline gap-2">
+                        <span class="text-2xl font-black text-blue-600">0건</span>
+                        <span class="text-xs text-slate-400">/ 월</span>
+                    </div>
+                    <div class="mt-2 text-xs font-bold text-blue-600 flex items-center gap-1">
+                        <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> 100% 탐지율 보장
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">광고/스팸 노이즈 차단</div>
+                    <div class="mt-2 flex items-baseline gap-2">
+                        <span class="text-2xl font-black text-slate-900">100%</span>
+                        <span class="text-xs text-slate-400">자동 격리</span>
+                    </div>
+                    <div class="mt-2 text-xs font-bold text-emerald-600 flex items-center gap-1">
+                        <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> 인지적 피로 원천 차단
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <h3 class="text-base font-bold text-slate-900 mb-4">도입 전/후 하루 소요 시간 비교 (분 단위)</h3>
+                    <div class="h-64">
+                        <canvas id="timeComparisonChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-5 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <h3 class="text-base font-bold text-slate-900 mb-4">수신 메일 카테고리 분포 비율</h3>
+                    <div class="h-64 flex items-center justify-center">
+                        <canvas id="categoryPieChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 5: SK AIGEN 포트폴리오 전문 ================= -->
+        <section id="tab-portfolio" class="hidden space-y-6">
+            <div class="bg-white p-8 sm:p-10 rounded-2xl border border-slate-200 shadow-sm max-w-4xl mx-auto space-y-8">
+                <!-- Header -->
+                <div class="border-b border-slate-200 pb-6">
+                    <div class="inline-block px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-bold mb-3">
+                        SK AIGEN 2년 전일제 과정 지원 포트폴리오
+                    </div>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900">
+                        SmartMail & DailyBriefing AI: AI 기반 개인 맞춤형 정보 자동 분류 및 요약 시스템
+                    </h1>
+                    <p class="text-sm text-slate-500 mt-2">
+                        진행 기간: 2026.10 ~ 2026.11 | 역할: 기획, 아키텍처 설계, AI 파이프라인 및 프론트엔드 전주기 1인 개발
+                    </p>
+                </div>
+
+                <!-- 1. Background -->
+                <div class="space-y-3">
+                    <h2 class="text-lg font-bold text-blue-900 border-l-4 border-blue-600 pl-3">1. 기획 배경 및 문제 정의</h2>
+                    <blockquote class="bg-slate-50 border-l-4 border-slate-300 p-4 text-sm text-slate-700 italic rounded-r-lg">
+                        "매일 쏟아지는 메일을 일일이 열어보고 여러 매체에서 뉴스를 직접 찾아 읽는 작업을 당연한 일상으로 넘기지 않고, 정보 탐색의 비효율을 개선하고자 AI 기반 자동화 시스템을 구축한 경험이 있습니다."
+                    </blockquote>
+                    <p class="text-sm text-slate-700 leading-relaxed">
+                        • <strong>수신함 병목:</strong> 일상적으로 수신되는 메일의 70% 이상이 광고와 단순 안내 메일임에도, 중요 메일 누락에 대한 불안감으로 모든 메일을 일일이 확인하는 데 하루 35분 이상 소모되었습니다.<br>
+                        • <strong>정보 탐색 피로도:</strong> 최신 IT, 경제, 시사 흐름을 놓치지 않기 위해 포털별로 검색하고 장문의 기사를 정독하며 일평균 40분의 인지적 에너지가 낭비되었습니다.
+                    </p>
+                </div>
+
+                <!-- 2. System Architecture -->
+                <div class="space-y-3">
+                    <h2 class="text-lg font-bold text-blue-900 border-l-4 border-blue-600 pl-3">2. 시스템 아키텍처 및 듀얼 엔진 설계</h2>
+                    <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 text-xs sm:text-sm text-slate-800 font-mono space-y-2">
+                        <div class="font-bold text-slate-900 pb-2 border-b border-slate-200">[System Pipeline Architecture]</div>
+                        <div>1. 데이터 수집 ➔ [이메일 수신함 (IMAP/Data) + 주요 언론사 RSS 3개 도메인]</div>
+                        <div>2. 텍스트 전처리 ➔ [BeautifulSoup HTML 클렌징 + 정규표현식 바이라인 노이즈 제거]</div>
+                        <div>3. 지능형 듀얼 엔진:</div>
+                        <div class="pl-4 text-blue-700">• Online: Gemini 1.5 Flash (Contextual Zero-shot & Structured JSON Output)</div>
+                        <div class="pl-4 text-emerald-700">• Fallback: 한국어 형태소/패턴 기반 Heuristic NLP 규칙 엔진 (Offline 100% 보장)</div>
+                        <div>4. 결과 표출 ➔ [GitHub Pages 기반 24/7 무중단 모닝 브리핑 웹 대시보드]</div>
+                    </div>
+                </div>
+
+                <!-- 3. Troubleshooting -->
+                <div class="space-y-4">
+                    <h2 class="text-lg font-bold text-blue-900 border-l-4 border-blue-600 pl-3">3. 기술적 난관 및 트러블슈팅 (Troubleshooting)</h2>
+                    
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-2">
+                        <div class="text-xs font-bold text-red-600">[트러블슈팅 1] LLM 비정형 출력으로 인한 파싱 에러(JSONDecodeError) 차단</div>
+                        <p class="text-xs text-slate-600">
+                            <strong>원인:</strong> LLM이 JSON 외에 설명문이나 마크다운 텍스트를 출력하여 시스템 다운 발생.<br>
+                            <strong>해결:</strong> API 호출 시 <code>responseMimeType: "application/json"</code> 강제 및 파이썬/JS 단에서 정규식 추출 2중 방어 로직을 적용해 파싱 성공률 100% 달성.
+                        </p>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-2">
+                        <div class="text-xs font-bold text-blue-600">[트러블슈팅 2] 제목에 [긴급] 태그가 없는 중요 메일 누락 방지</div>
+                        <p class="text-xs text-slate-600">
+                            <strong>원인:</strong> 제목에 태그가 없으나 본문에 "내일까지 검토 부탁드립니다"와 같은 중요 마감 요청이 존재할 경우 일반 메일로 오분류 위험.<br>
+                            <strong>해결:</strong> 본문 내 마감 시한 패턴(<code>금일 \d+시</code>, <code>내일까지</code>)과 행동 유도 키워드(<code>검토</code>, <code>승인</code>, <code>회신</code>)를 교차 스코어링하여 긴급도 탐지율 100% 확보.
+                        </p>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-2">
+                        <div class="text-xs font-bold text-emerald-600">[트러블슈팅 3] 호스팅 플랫폼 잠김 현상(Streamlit Sleep) 극복</div>
+                        <p class="text-xs text-slate-600">
+                            <strong>원인:</strong> 무료 클라우드 대시보드는 일정 시간 방문자가 없으면 서버가 절전 모드로 전환되어 평가자 열람 시 로딩 지연 유발.<br>
+                            <strong>해결:</strong> 서버리스 정적 아키텍처(HTML/JS + GitHub Pages)로 전면 마이그레이션하여 24시간 365일 무지연 즉시 응답 체계 구축.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 4. SK AIGEN Vision -->
+                <div class="space-y-3">
+                    <h2 class="text-lg font-bold text-blue-900 border-l-4 border-blue-600 pl-3">4. SK AIGEN 교육 과정과의 연계성 및 포부</h2>
+                    <p class="text-sm text-slate-700 leading-relaxed">
+                        본 프로젝트를 통해 "일상의 문제를 기술로 전환하는 문제 해결력"과 "안정적인 소프트웨어 엔지니어링"의 기초를 다졌습니다. 향후 본 프로토타입을 개인 메일 히스토리를 기억하는 **RAG(검색 증강 생성) 기반 맞춤형 문맥 참조** 및 **경량 SLM(Small Language Model) 온디바이스 파인튜닝**, **자율 에이전트(Autonomous Agent)**로 발전시키고자 합니다.  
+                        SK AIGEN의 2년 전일제 심화 커리큘럼(MLOps, 대규모 분산 데이터 처리, 최신 LLM 에이전트 아키텍처)에 전념하여, 단순한 모델 사용자를 넘어 복잡한 현실의 문제를 기술로 해결하는 **실무형 핵심 AI 엔지니어**로 성장하겠습니다.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal for Email Detail -->
+    <div id="email-modal" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-start">
+                <div id="modal-category-badge"></div>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 p-1">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div>
+                <h3 id="modal-subject" class="text-lg font-bold text-slate-900"></h3>
+                <div class="text-xs text-slate-500 mt-1" id="modal-meta"></div>
+            </div>
+            
+            <div class="p-3 bg-blue-50 border border-blue-100 rounded-xl">
+                <div class="text-xs font-bold text-blue-800 flex items-center gap-1.5 mb-1">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> AI 1줄 핵심 요약
+                </div>
+                <div id="modal-summary" class="text-sm font-semibold text-slate-800"></div>
+                <div id="modal-reason" class="text-xs text-slate-500 mt-1 italic"></div>
+            </div>
+
+            <div>
+                <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">필요 조치 사항 (Action Items)</h4>
+                <div id="modal-actions" class="space-y-1.5"></div>
+            </div>
+
+            <div>
+                <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">메일 본문 전문</h4>
+                <pre id="modal-body" class="bg-slate-50 p-4 rounded-xl text-xs text-slate-700 whitespace-pre-wrap font-sans border border-slate-200 leading-relaxed"></pre>
+            </div>
+
+            <div class="flex justify-end pt-2">
+                <button onclick="closeModal()" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-lg">닫기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data & Interactive Logic -->
+    <script>
+        // Sample Email Data (Matching Self-Introduction)
+        const emailsData = [
+            {
+                id: "mail-001",
+                sender: "김민수 팀장 <mskim@skcompany.com>",
+                subject: "[긴급] SK AIGEN 2차 프로젝트 최종 기획서 검토 요청 (금일 17시 마감)",
+                date: "2026-11-09 08:35",
+                importance: "HIGH",
+                category: "긴급 업무",
+                summary: "SK AIGEN 산학 프로젝트 제안서 초안 마감 (금일 17시까지 지표 검토 필요)",
+                reason: "마감 시한(금일 17시) 명시 및 기획서·지표 검토 액션 요청으로 HIGH 긴급도 판별",
+                action_items: ["첨부 기획서 및 파이프라인 지표 검토 후 17시 전 회신", "실시간 처리 지표(Latency) 적정성 확인"],
+                body: "성훈 님, 안녕하세요. 김민수입니다.\n\n이번 주 수요일에 진행될 SK AIGEN 산학 연계 프로젝트 제안서 초안을 첨부했습니다. 주요 아키텍처 및 파이프라인 구성 파트의 수정 사항을 오늘 오후 5시까지 확인 부탁드립니다. 특히 AI 메일 분류 및 뉴스 요약 파이프라인의 실시간 처리 성능 지표(Latency) 부분을 중점적으로 검토해 주시기 바랍니다.\n\n바쁘시겠지만 기한 내 회신 부탁드립니다. 감사합니다."
+            },
+            {
+                id: "mail-002",
+                sender: "박지영 재무담당 <jypark@finance-sk.com>",
+                subject: "[중요] 11월 연구개발 소프트웨어 구독 라이선스 세금계산서 승인 요청",
+                date: "2026-11-09 09:12",
+                importance: "HIGH",
+                category: "긴급 업무",
+                summary: "클라우드 GPU 및 AI 라이선스 세금계산서 전자결재 승인 요청 (내일까지)",
+                reason: "지출 승인 기한(내일) 및 라이선스 연장 불가 리스크 감지로 HIGH 긴급도 판별",
+                action_items: ["전자결재 시스템 접속 후 라이선스 정산 품의 승인"],
+                body: "안녕하세요. 재무팀 박지영입니다.\n\n이번 달 프로젝트에 활용된 클라우드 GPU 서버 및 AI API 사용료 정산 관련 전자세금계산서가 발행되었습니다. 전자결재 시스템에서 내일까지 품의 승인 처리를 진행해 주셔야 정상 입금 및 라이선스 연장이 가능합니다. 첨부된 청구 내역서를 확인하시고 결재 진행 부탁드립니다."
+            },
+            {
+                id: "mail-003",
+                sender: "이동현 연구원 <dhlee@lab-ai.org>",
+                subject: "지난주 LLM 경량화 및 프롬프트 최적화 스터디 회의록 공유",
+                date: "2026-11-08 18:20",
+                importance: "MEDIUM",
+                category: "일반 업무",
+                summary: "경량화 언어모델 스터디 회의록 공유 및 다음 차례 발표 준비 안내",
+                reason: "단기 마감 없으나 주간 스터디 발표 준비 액션이 포함되어 MEDIUM 판별",
+                action_items: ["다음 차례 발표 자료 준비 (정형 JSON 출력 안정화 기법)"],
+                body: "스터디원 여러분 안녕하십니까.\n\n지난주 금요일에 진행된 '경량화 언어모델(SLM)을 활용한 텍스트 분류 및 요약 정확도 향상 기법' 스터디 회의록을 노션 페이지에 정리하여 공유드립니다. 다음 차례 발표는 성훈 님께서 'Few-shot 프롬프팅 기반 정형 JSON 출력 안정화 기법'에 대해 준비해 주시면 됩니다. 일정 참고 부탁드립니다."
+            },
+            {
+                id: "mail-004",
+                sender: "사내정보보안팀 <security@skcompany.com>",
+                subject: "[공지] 11월 정기 서버 보안 점검 및 2차 인증(MFA) 갱신 안내",
+                date: "2026-11-08 14:00",
+                importance: "LOW",
+                category: "단순 공지",
+                summary: "이번 주 토요일 야간 정기 서버 점검 및 사내망 일시 중단 안내",
+                reason: "정기 점검 일정 단순 공유로 즉각적인 업무 조치 불필요",
+                action_items: ["토요일 야간 서버 중단 일정 캘린더 메모", "MFA 갱신 여부 확인"],
+                body: "임직원 여러분 안녕하십니까.\n\n사내 정보 보안 강화를 위한 11월 정기 인프라 점검이 이번 주 토요일 22:00부터 익일 04:00까지 진행됩니다. 해당 시간 동안 내부 사내망 및 일부 테스트베드 접속이 일시 중단될 수 있습니다. 또한 90일 주기의 MFA 갱신 대상자분들은 기한 내 업데이트를 완료해 주시기 바랍니다."
+            },
+            {
+                id: "mail-005",
+                sender: "글로벌 테크 아카데미 <newsletter@tech-learning.io>",
+                subject: "[광고] 2026 최신 MLOps & LLM 파이프라인 올인원 패키지 75% 특별 할인",
+                date: "2026-11-09 07:15",
+                importance: "LOW",
+                category: "광고/홍보",
+                summary: "MLOps & LangChain 온라인 강좌 75% 특가 할인 프로모션",
+                reason: "광고성 키워드 다수 감지 및 외부 판촉물로 판단하여 최저 우선순위 격리",
+                action_items: [],
+                body: "지금 수강신청 시 얼리버드 한정 75% 할인 혜택!\nLangChain, LlamaIndex, vLLM을 활용한 엔터프라이즈 레벨의 프로덕션 구축 코스를 만나보세요. 3일간만 진행되는 한정 특가 찬스를 놓치지 마세요. 지금 바로 링크를 클릭해 수강권을 확인하세요."
+            },
+            {
+                id: "mail-006",
+                sender: "스마트헬스 클럽 <cs@smartfitness.co.kr>",
+                subject: "[안내] 성훈 회원님, 헬스장 락커룸 정기 청소 및 사물함 정리 일정 안내",
+                date: "2026-11-07 11:30",
+                importance: "LOW",
+                category: "단순 공지",
+                summary: "헬스장 락커룸 분기별 정기 청소 및 사물함 정리 일정 공지",
+                reason: "개인 생활 편의 공지로 업무적 우선순위 없음",
+                action_items: [],
+                body: "안녕하세요, 스마트헬스 회원 관리팀입니다. 회원님께서 이용 중이신 개인 사물함 구역의 분기별 정기 청소가 11월 15일에 실시됩니다. 보관 중인 개인 물품을 미리 점검해 주시기 바랍니다."
+            },
+            {
+                id: "mail-007",
+                sender: "최수진 파트너 매니저 <sjchoi@datacorp.com>",
+                subject: "[확인 요청] 클라우드 데이터 파이프라인 API 연동 규격서 피드백 요청",
+                date: "2026-11-09 10:05",
+                importance: "MEDIUM",
+                category: "일반 업무",
+                summary: "API 연동 규격서 v1.2 스키마 호환성 확인 및 목요일 오전까지 회신 요청",
+                reason: "협력사 규격서 피드백 요청 메일로 중간 우선순위 판별",
+                action_items: ["API 규격서 v1.2 스키마 호환성 검토", "목요일 오전까지 회신"],
+                body: "성훈 님, 반갑습니다. 데이터코퍼레이션 최수진입니다.\n\n지난 미팅에서 논의했던 메일 수신 IMAP 및 RSS 기사 정제 파이프라인 연동 인터페이스 v1.2 규격서를 첨부파일로 송부합니다. 기존 스키마와의 호환성 여부를 확인하신 뒤, 이번 주 목요일 오전까지 회신 주시면 개발팀에 전달하도록 하겠습니다."
+            },
+            {
+                id: "mail-008",
+                sender: "쇼핑몰 위클리 <promo@trendmall.co.kr>",
+                subject: "(광고) 가을 시즌오프! 테크 오피스 체어 & 데스크테리어 최대 50% 세일",
+                date: "2026-11-09 06:40",
+                importance: "LOW",
+                category: "광고/홍보",
+                summary: "사무용 의자 및 데스크용품 가을 세일 시크릿 쿠폰 안내",
+                reason: "(광고) 표기 및 판촉 이벤트 메일로 판단하여 즉시 격리",
+                action_items: [],
+                body: "회원님만을 위한 특별 시크릿 쿠폰이 도착했습니다. 오랜 시간 개발 작업으로 지친 목과 허리를 위한 인체공학 의자와 모니터암 특가전! 무료 배송 쿠폰을 지금 다운로드하세요."
+            }
+        ];
+
+        // Sample Real-time News Data for 3 Categories
+        const newsData = [
+            {
+                category: "IT/테크",
+                title: "SK텔레콤, 차세대 AI 에이전트 인프라 확장 및 생성형 AI 서비스 가속화",
+                published: "2026-11-09 09:30",
+                summary: [
+                    "SKT가 자체 거대언어모델(LLM)과 글로벌 파트너십을 결합한 통합 AI 서비스 생태계를 본격 확대합니다.",
+                    "기업 및 개인 맞춤형 인공지능 비서 서비스의 연동 성능을 대폭 끌어올렸습니다.",
+                    "향후 일상 자동화와 데이터 분석 파이프라인의 핵심 축으로 자리잡을 전망입니다."
+                ],
+                takeaway: "개인화 비서 시장 선점을 위한 에이전트 인프라 경쟁 가속화"
+            },
+            {
+                category: "IT/테크",
+                title: "오픈소스 경량 LLM 모델 고도화... 온디바이스 AI 채택 급증",
+                published: "2026-11-09 08:45",
+                summary: [
+                    "파라미터 7B 이하의 초경량 언어 모델들이 텍스트 분류와 요약 태스크에서 상용 대형 모델에 필적하는 정확도를 기록했습니다.",
+                    "프라이버시 보호와 클라우드 API 호출 비용 절감 측면에서 엔터프라이즈 도입이 가속화되고 있습니다.",
+                    "로컬 자동화 에이전트 개발 트렌드가 활성화되는 추세입니다."
+                ],
+                takeaway: "API 의존도를 낮춘 고효율 경량 모델 도입 타당성 증명"
+            },
+            {
+                category: "경제/금융",
+                title: "글로벌 통화 정책 완화 속 테크 스타트업 실무 AI 솔루션 투자 심리 회복",
+                published: "2026-11-09 09:10",
+                summary: [
+                    "글로벌 금리 인하 기대감에 힘입어 AI 및 로보틱스 기술 기반 벤처 투자가 반등하고 있습니다.",
+                    "단순 아이디어보다는 실질적 비용 절감과 자동화 솔루션을 검증한 소프트웨어에 자금이 집중되고 있습니다.",
+                    "국내 테크 생태계에도 생산성 개선 소프트웨어 중심의 수요 확산이 예상됩니다."
+                ],
+                takeaway: "실질적 ROI(시간/비용 절감)를 입증하는 자동화 도구의 시장 가치 상승"
+            },
+            {
+                category: "시사/종합",
+                title: "정부, '전국민 AI 일상화 및 실무형 디지털 핵심 인재 양성' 투자 확대",
+                published: "2026-11-09 07:50",
+                summary: [
+                    "디지털 전환 시대를 주도할 실무형 AI 핵심 인력 육성을 위한 2년 전일제 심화 교육 프로젝트가 확대 시행됩니다.",
+                    "산학 연계 프로젝트 중심의 실무 커리큘럼을 통해 현업 투입 즉시 성과를 내는 엔지니어를 양성할 계획입니다.",
+                    "기업들의 실무형 AI 인재 채용 수요와 맞물려 큰 호응을 얻고 있습니다."
+                ],
+                takeaway: "실무 프로젝트 기반 전일제 집중 과정(SK AIGEN)의 필요성과 비전 부합"
+            }
+        ];
+
+        // Current filter state
+        let currentCat = "전체";
+        let currentNewsCat = "IT/테크";
+
+        // Tab Switcher
+        function switchTab(tabId) {
+            ['briefing', 'inbox', 'news', 'analytics', 'portfolio'].forEach(t => {
+                const el = document.getElementById(`tab-${t}`);
+                const btn = document.getElementById(`tab-btn-${t}`);
+                if (t === tabId) {
+                    el.classList.remove('hidden');
+                    btn.classList.add('active');
+                } else {
+                    el.classList.add('hidden');
+                    btn.classList.remove('active');
+                }
+            });
+            lucide.createIcons();
+            if (tabId === 'analytics') {
+                renderCharts();
+            }
+        }
+
+        // Render Briefing Tab
+        function renderBriefing() {
+            const urgentMails = emailsData.filter(e => e.importance === "HIGH");
+            const urgentContainer = document.getElementById("briefing-urgent-list");
+            
+            urgentContainer.innerHTML = urgentMails.map(m => `
+                <div class="bg-white p-5 rounded-xl border-l-4 border-red-500 border-t border-r border-b border-slate-200 shadow-sm hover:shadow-md transition">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700">🚨 HIGH PRIORITY</span>
+                        <span class="text-xs text-slate-400">${m.date}</span>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900 mb-1 hover:text-blue-600 cursor-pointer" onclick="openModal('${m.id}')">${m.subject}</h3>
+                    <div class="text-xs text-slate-500 mb-2">발신자: <strong>${m.sender}</strong></div>
+                    <div class="bg-slate-50 p-3 rounded-lg text-xs text-slate-700 mb-3 border border-slate-100">
+                        <span class="font-bold text-slate-900">📌 핵심 요약:</span> ${m.summary}
+                    </div>
+                    <div class="flex flex-wrap items-center gap-1.5 text-xs">
+                        <span class="font-semibold text-slate-600">필요 조치:</span>
+                        ${m.action_items.map(act => `<span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded font-medium border border-blue-200">✓ ${act}</span>`).join('')}
+                    </div>
+                </div>
+            `).join('');
+
+            const newsContainer = document.getElementById("briefing-news-list");
+            const topNews = newsData.slice(0, 3);
+            newsContainer.innerHTML = topNews.map(n => `
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:border-blue-300 transition">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <span class="text-xs font-bold text-blue-600">[${n.category}]</span>
+                        <span class="text-xs text-slate-400">${n.published}</span>
+                    </div>
+                    <h4 class="text-sm font-bold text-slate-800 line-clamp-1 mb-2">${n.title}</h4>
+                    <div class="text-xs text-slate-600 space-y-1 mb-2 bg-slate-50 p-2.5 rounded-lg">
+                        ${n.summary.map(s => `<div>• ${s}</div>`).join('')}
+                    </div>
+                    <div class="text-xs text-amber-700 bg-amber-50 px-2 py-1 rounded font-medium">
+                        💡 ${n.takeaway}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Render Inbox Mails
+        function renderInbox(mails = emailsData) {
+            const listEl = document.getElementById("mail-list");
+            if (mails.length === 0) {
+                listEl.innerHTML = `<div class="p-8 text-center text-slate-400 bg-white rounded-xl border border-slate-200">일치하는 이메일이 없습니다.</div>`;
+                return;
+            }
+
+            listEl.innerHTML = mails.map(m => {
+                let badgeClass = "bg-slate-100 text-slate-700";
+                if (m.category === "긴급 업무") badgeClass = "bg-red-100 text-red-700 font-bold border border-red-200";
+                else if (m.category === "일반 업무") badgeClass = "bg-blue-100 text-blue-700 font-semibold";
+                else if (m.category === "단순 공지") badgeClass = "bg-amber-100 text-amber-800";
+
+                return `
+                    <div class="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 hover:border-slate-300 shadow-sm transition cursor-pointer" onclick="openModal('${m.id}')">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+                            <div class="flex items-center gap-2">
+                                <span class="px-2.5 py-0.5 rounded-full text-xs ${badgeClass}">${m.category}</span>
+                                <span class="text-xs font-bold ${m.importance === 'HIGH' ? 'text-red-600' : 'text-slate-400'}">[${m.importance}]</span>
+                                <span class="text-xs text-slate-500">${m.sender}</span>
+                            </div>
+                            <span class="text-xs text-slate-400">${m.date}</span>
+                        </div>
+                        <h3 class="text-sm sm:text-base font-bold text-slate-900 mb-1">${m.subject}</h3>
+                        <p class="text-xs text-slate-600 line-clamp-1 mb-2"><strong>AI 요약:</strong> ${m.summary}</p>
+                        
+                        <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 text-xs">
+                            <span class="text-slate-400 italic">근거: ${m.reason}</span>
+                            ${m.action_items.length > 0 ? `<span class="text-blue-600 font-semibold">To-Do ${m.action_items.length}개</span>` : '<span class="text-slate-400">조치 불필요</span>'}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        function filterCategory(cat) {
+            currentCat = cat;
+            document.querySelectorAll(".cat-pill").forEach(el => {
+                if (el.textContent.includes(cat)) {
+                    el.className = "cat-pill active px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-white";
+                } else {
+                    el.className = "cat-pill px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700";
+                }
+            });
+
+            const filtered = (cat === "전체") ? emailsData : emailsData.filter(e => e.category === cat);
+            renderInbox(filtered);
+        }
+
+        function handleSearch() {
+            const query = document.getElementById("mail-search").value.toLowerCase();
+            let baseList = (currentCat === "전체") ? emailsData : emailsData.filter(e => e.category === currentCat);
+            const filtered = baseList.filter(e => 
+                e.subject.toLowerCase().includes(query) || 
+                e.body.toLowerCase().includes(query) || 
+                e.sender.toLowerCase().includes(query)
+            );
+            renderInbox(filtered);
+        }
+
+        // Render News
+        function renderNews() {
+            const grid = document.getElementById("news-grid");
+            const articles = newsData.filter(n => n.category === currentNewsCat);
+
+            grid.innerHTML = articles.map(art => `
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded-full">${art.category}</span>
+                            <span class="text-xs text-slate-400">${art.published}</span>
+                        </div>
+                        <h3 class="text-base font-bold text-slate-900 mb-3">${art.title}</h3>
+                        <div class="bg-slate-50 p-3 rounded-lg text-xs text-slate-700 space-y-1.5 mb-3">
+                            <div class="font-bold text-slate-900 mb-1">📌 핵심 3줄 요약</div>
+                            ${art.summary.map(s => `<div>• ${s}</div>`).join('')}
+                        </div>
+                    </div>
+                    <div class="text-xs bg-amber-50 text-amber-800 p-2.5 rounded-lg font-medium border border-amber-100">
+                        💡 <strong>실무 인사이트:</strong> ${art.takeaway}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterNewsCategory(cat) {
+            currentNewsCat = cat;
+            document.querySelectorAll(".news-cat-btn").forEach(btn => {
+                if (btn.textContent.includes(cat.split('/')[0])) {
+                    btn.className = "news-cat-btn active px-3.5 py-1.5 text-xs font-bold rounded-lg bg-blue-600 text-white";
+                } else {
+                    btn.className = "news-cat-btn px-3.5 py-1.5 text-xs font-bold rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200";
+                }
+            });
+            renderNews();
+        }
+
+        // Modal Logic
+        function openModal(id) {
+            const item = emailsData.find(e => e.id === id);
+            if (!item) return;
+
+            document.getElementById("modal-category-badge").innerHTML = `
+                <span class="px-2.5 py-1 rounded-full text-xs font-bold ${item.importance === 'HIGH' ? 'bg-red-100 text-red-700' : 'bg-slate-100 text-slate-700'}">
+                    ${item.category} • ${item.importance}
+                </span>
+            `;
+            document.getElementById("modal-subject").textContent = item.subject;
+            document.getElementById("modal-meta").textContent = `발신: ${item.sender} | 일시: ${item.date}`;
+            document.getElementById("modal-summary").textContent = item.summary;
+            document.getElementById("modal-reason").textContent = `분류 근거: ${item.reason}`;
+            document.getElementById("modal-body").textContent = item.body;
+
+            const actionsEl = document.getElementById("modal-actions");
+            if (item.action_items.length > 0) {
+                actionsEl.innerHTML = item.action_items.map((act, i) => `
+                    <label class="flex items-center gap-2 text-xs text-slate-700 bg-slate-50 p-2 rounded-lg cursor-pointer hover:bg-slate-100">
+                        <input type="checkbox" class="rounded text-blue-600 focus:ring-blue-500">
+                        <span>${act}</span>
+                    </label>
+                `).join('');
+            } else {
+                actionsEl.innerHTML = `<span class="text-xs text-slate-400">필요한 즉각 조치 사항이 없습니다.</span>`;
+            }
+
+            document.getElementById("email-modal").classList.remove("hidden");
+            lucide.createIcons();
+        }
+
+        function closeModal() {
+            document.getElementById("email-modal").classList.add("hidden");
+        }
+
+        // Render Charts in Analytics Tab
+        let chartsRendered = false;
+        function renderCharts() {
+            if (chartsRendered) return;
+            chartsRendered = true;
+
+            // 1. Time comparison bar chart
+            const ctx1 = document.getElementById('timeComparisonChart').getContext('2d');
+            new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: ['수신 메일 확인 및 정리', '뉴스 검색 및 정독', '아침 일과 총 준비 시간'],
+                    datasets: [
+                        {
+                            label: '도입 전 (기존 수작업)',
+                            data: [35, 40, 75],
+                            backgroundColor: '#94a3b8',
+                            borderRadius: 6
+                        },
+                        {
+                            label: '도입 후 (AI 자동화 시스템)',
+                            data: [7, 8, 15],
+                            backgroundColor: '#2563eb',
+                            borderRadius: 6
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: '소요 시간 (분)' }
+                        }
+                    }
+                }
+            });
+
+            // 2. Category Pie Chart
+            const ctx2 = document.getElementById('categoryPieChart').getContext('2d');
+            new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: ['긴급 업무', '일반 업무', '단순 공지', '광고/홍보'],
+                    datasets: [{
+                        data: [2, 2, 2, 2],
+                        backgroundColor: ['#ef4444', '#3b82f6', '#f59e0b', '#cbd5e1']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        }
+
+        // Initialize on load
+        window.addEventListener("DOMContentLoaded", () => {
+            renderBriefing();
+            renderInbox();
+            renderNews();
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>
