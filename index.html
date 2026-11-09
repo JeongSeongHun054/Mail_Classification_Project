@@ -1060,14 +1060,12 @@
         }
 
         // Google Identity Services OAuth Sign-In
-        let GOOGLE_CLIENT_ID = localStorage.getItem("g_client_id") || "";
+        let GOOGLE_CLIENT_ID = "332759668669-ledduerf37okdfbh1gualganuo8p4u2m.apps.googleusercontent.com";
         let tokenClient;
 
         function handleOneClickGoogleLogin() {
-            if (!GOOGLE_CLIENT_ID) {
-                openGoogleSetupModal();
-                return;
-            }
+            const btn = document.getElementById("btn-google-main");
+            if (btn) btn.innerHTML = `<span>⏳ Google 로그인 창 호출 중...</span>`;
 
             try {
                 tokenClient = google.accounts.oauth2.initTokenClient({
@@ -1075,16 +1073,19 @@
                     scope: 'https://www.googleapis.com/auth/gmail.readonly',
                     callback: async (resp) => {
                         if (resp.error) {
-                            alert("Google 로그인 실패: " + resp.error);
+                            alert("Google 로그인 취소 또는 오류: " + resp.error);
+                            if (btn) btn.innerHTML = `<span>Google 계정으로 로그인 & 내 메일 분류</span>`;
                             return;
                         }
+                        if (btn) btn.innerHTML = `<span>⚡ 수신함에서 최신 메일 수집 및 AI 분석 중...</span>`;
                         updateGoogleLoginState(true);
                         await fetchRealGmailMessages(resp.access_token);
                     }
                 });
                 tokenClient.requestAccessToken({ prompt: 'consent' });
             } catch (err) {
-                alert("Google OAuth 라이브러리 호출 실패: " + err.message);
+                alert("Google OAuth 초기화 오류: " + err.message);
+                if (btn) btn.innerHTML = `<span>Google 계정으로 로그인 & 내 메일 분류</span>`;
             }
         }
 
