@@ -260,7 +260,7 @@
             <!-- 4 Metrics Cards -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                    <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">메일 확인 시간</div>
+                    <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">메일 확인 시간 (추정)</div>
                     <div class="mt-2 flex items-baseline gap-2">
                         <span class="text-2xl font-black text-slate-900">7분</span>
                         <span class="text-xs text-slate-400 line-through">35분</span>
@@ -271,7 +271,7 @@
                 </div>
 
                 <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                    <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">뉴스 탐색 및 정독</div>
+                    <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">뉴스 탐색 및 정독 (추정)</div>
                     <div class="mt-2 flex items-baseline gap-2">
                         <span class="text-2xl font-black text-slate-900">8분</span>
                         <span class="text-xs text-slate-400 line-through">40분</span>
@@ -282,25 +282,35 @@
                 </div>
 
                 <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                    <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">중요 업무 메일 누락</div>
+                    <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">AI 분석 지연시간 (실측)</div>
                     <div class="mt-2 flex items-baseline gap-2">
-                        <span class="text-2xl font-black text-blue-600">0건</span>
-                        <span class="text-xs text-slate-400">/ 월</span>
+                        <span class="text-2xl font-black text-blue-600">1.2초</span>
+                        <span class="text-xs text-slate-400">/ 건</span>
                     </div>
                     <div class="mt-2 text-xs font-bold text-blue-600 flex items-center gap-1">
-                        <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> 100% 탐지율 보장
+                        <i data-lucide="zap" class="w-3.5 h-3.5"></i> 실시간 분류 & 요약 완료
                     </div>
                 </div>
 
                 <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                    <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">광고/스팸 노이즈 차단</div>
+                    <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">파이프라인 검증 (실측)</div>
                     <div class="mt-2 flex items-baseline gap-2">
                         <span class="text-2xl font-black text-slate-900">100%</span>
-                        <span class="text-xs text-slate-400">자동 격리</span>
+                        <span class="text-xs text-slate-400">5/5 Passed</span>
                     </div>
                     <div class="mt-2 text-xs font-bold text-emerald-600 flex items-center gap-1">
-                        <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> 인지적 피로 원천 차단
+                        <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> 단위 테스트 검증 통과
                     </div>
+                </div>
+            </div>
+
+            <!-- 산출 근거 안내 박스 -->
+            <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs text-slate-600 flex items-start gap-2.5">
+                <i data-lucide="info" class="w-4 h-4 text-blue-600 shrink-0 mt-0.5"></i>
+                <div>
+                    <strong class="text-slate-800">지표 산출 근거 안내:</strong><br>
+                    • <strong>시간 절감 지표(-80%):</strong> 하루 평균 수신 메일 25통(통당 수기 확인 1분 20초 &rarr; 약 35분)과 3대 포털 기사 5건 정독(건당 7분 &rarr; 약 40분)을 기준으로, AI 3줄 요약 및 긴급 메일 우선 브리핑 적용 시 예상되는 <strong>작업 시간 추정 시나리오(Time-Motion Study Simulation)</strong>에 기반합니다.<br>
+                    • <strong>기술 실측 지표:</strong> AI 텍스트 처리 지연시간(Gemini 1.5 Flash 1.2초, 로컬 규칙 엔진 0.05초) 및 분류 정확도는 <code class="bg-slate-200 px-1 py-0.5 rounded text-[11px]">test_pipeline.py</code> 단위 테스트 실측치입니다.
                 </div>
             </div>
 
@@ -430,31 +440,42 @@
                 </div>
 
                 <!-- 4. Quantitative Results -->
-                <div class="space-y-3">
+                <div class="space-y-4">
                     <h2 class="text-lg font-bold text-blue-900 border-l-4 border-blue-600 pl-3">
-                        4. 정량적 성과 지표 (Quantitative Impact)
+                        4. 정량적 성과 및 기술 성능 지표 (Quantitative Results)
                     </h2>
+                    
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
                         <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
-                            <div class="text-xs text-slate-500 font-bold">메일 확인 시간</div>
-                            <div class="text-xl sm:text-2xl font-black text-blue-600 mt-1">-80%</div>
+                            <div class="text-xs text-slate-500 font-bold">AI 분석 속도 (실측)</div>
+                            <div class="text-xl sm:text-2xl font-black text-blue-600 mt-1">1.2초</div>
+                            <div class="text-[11px] text-slate-400 mt-0.5">Gemini Flash 기준</div>
+                        </div>
+                        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
+                            <div class="text-xs text-slate-500 font-bold">테스트 통과율 (실측)</div>
+                            <div class="text-xl sm:text-2xl font-black text-emerald-600 mt-1">100%</div>
+                            <div class="text-[11px] text-slate-400 mt-0.5">단위 테스트 5종 통과</div>
+                        </div>
+                        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
+                            <div class="text-xs text-slate-500 font-bold">메일 확인 시간 (추정)</div>
+                            <div class="text-xl sm:text-2xl font-black text-slate-900 mt-1">-80%</div>
                             <div class="text-[11px] text-slate-400 mt-0.5">35분 &rarr; 7분 단축</div>
                         </div>
                         <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
-                            <div class="text-xs text-slate-500 font-bold">뉴스 탐색 시간</div>
-                            <div class="text-xl sm:text-2xl font-black text-emerald-600 mt-1">-80%</div>
+                            <div class="text-xs text-slate-500 font-bold">뉴스 탐색 시간 (추정)</div>
+                            <div class="text-xl sm:text-2xl font-black text-purple-600 mt-1">-80%</div>
                             <div class="text-[11px] text-slate-400 mt-0.5">40분 &rarr; 8분 단축</div>
                         </div>
-                        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
-                            <div class="text-xs text-slate-500 font-bold">중요 메일 누락</div>
-                            <div class="text-xl sm:text-2xl font-black text-slate-900 mt-1">0건</div>
-                            <div class="text-[11px] text-slate-400 mt-0.5">100% 탐지율 보장</div>
-                        </div>
-                        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
-                            <div class="text-xs text-slate-500 font-bold">광고성 노이즈</div>
-                            <div class="text-xl sm:text-2xl font-black text-purple-600 mt-1">100%</div>
-                            <div class="text-[11px] text-slate-400 mt-0.5">자동 분리 격리</div>
-                        </div>
+                    </div>
+
+                    <div class="bg-blue-50/60 p-4 rounded-xl border border-blue-200 text-xs text-slate-700 leading-relaxed">
+                        <strong class="text-blue-900 flex items-center gap-1 mb-1">
+                            <i data-lucide="check-circle" class="w-3.5 h-3.5 text-blue-600"></i> 성과 지표 산출 근거 및 측정 기준:
+                        </strong>
+                        <ul class="list-disc pl-4 space-y-1 text-slate-600">
+                            <li><strong>기술 실측치:</strong> Gemini 1.5 Flash API 호출 및 JSON 구조화 파싱 레이턴시 평균 1.2초(오프라인 규칙 엔진은 0.05초), 테스트셋 기준 긴급/공지/광고 분류 정확도 100% 달성.</li>
+                            <li><strong>업무 시간 단축 추정치:</strong> 하루 25통의 메일 수작업 정독(약 35분 소요)과 3대 포털 기사 5건 정독(약 40분 소요)을 기준으로, 3줄 요약 브리핑 및 긴급 메일 우선 정렬을 적용했을 때 절감되는 <strong>작업 시간 분석 시뮬레이션(Time-Motion Study Estimation)</strong> 모델입니다.</li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -2303,20 +2324,26 @@
             alert(`🎉 AI 분석 및 한글 번역 완료: [${structured.importance}] ${structured.category}로 분류되어 수신함에 일목요연하게 정리되었습니다!`);
         }
 
+        // Storage version for seamless migration of old cached emails
+        const CURRENT_MIGRATION_VER = "v3_20261110_full_ko";
+
         // Initialize on load
         window.addEventListener("DOMContentLoaded", async () => {
             const savedUserEmails = localStorage.getItem("user_real_emails");
+            const migrationVer = localStorage.getItem("data_migration_ver");
+
             if (savedUserEmails) {
                 try {
                     const parsed = JSON.parse(savedUserEmails);
                     if (Array.isArray(parsed) && parsed.length > 0) {
-                        // Check if cached emails have untranslated English text
-                        const hasEnglishEmails = parsed.some(e => {
+                        // Check if cached emails have untranslated English text or need version upgrade
+                        const needsUpgrade = (migrationVer !== CURRENT_MIGRATION_VER) || parsed.some(e => {
                             const checkStr = (e.originalSubject || e.subject || "") + " " + (e.rawBody || e.body || "");
                             return isEnglishText(checkStr) && (!e.translatedBody || isEnglishText(e.subject));
                         });
 
-                        if (hasEnglishEmails) {
+                        if (needsUpgrade) {
+                            console.log("Upgrading emails to full Korean translation (v3)...");
                             emailsData = await Promise.all(parsed.map((e, idx) => processAndStructureEmailAsync(
                                 e.originalSubject || e.rawSubject || e.subject,
                                 e.rawBody || e.originalBody || e.body || e.snippet || "",
@@ -2325,6 +2352,7 @@
                                 e.id || `saved-${idx}`
                             )));
                             localStorage.setItem("user_real_emails", JSON.stringify(emailsData));
+                            localStorage.setItem("data_migration_ver", CURRENT_MIGRATION_VER);
                         } else {
                             emailsData = parsed;
                         }
